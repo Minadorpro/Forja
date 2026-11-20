@@ -786,7 +786,10 @@ function ownerDayPanel(c,d){
 const FBV='10.12.2';
 const FB={db:null,auth:null,uid:null,loading:null};
 const inClaude=()=>!!window.claude;
-const fbCfg=()=>{const f=S.settings.fb;return f&&f.apiKey&&f.projectId?f:null};
+/* Configuración de Firebase integrada: así cualquier dispositivo ve directamente la pantalla de acceso */
+const FORJA_FIREBASE={apiKey:'AIzaSyB_fh7rK3h8uYAf9WR0wqkAOuuDioS-m2c',authDomain:'forja-678d2.firebaseapp.com',projectId:'forja-678d2',appId:'1:602790089977:web:49de3a2fea32ba30763e28'};
+const builtinFb=()=>FORJA_FIREBASE.apiKey&&!FORJA_FIREBASE.apiKey.startsWith('__')?FORJA_FIREBASE:null;
+const fbCfg=()=>{const f=S.settings.fb;return f&&f.apiKey&&f.projectId?f:builtinFb()};
 function loadScript(src){return new Promise((res,rej)=>{if(document.querySelector(`script[src="${src}"]`))return res();const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=()=>rej(new Error('No se pudo cargar Firebase. Revisa tu conexión.'));document.head.appendChild(s)})}
 async function fbInit(cfg,needAuth){
   if(!FB.loading)FB.loading=(async()=>{
