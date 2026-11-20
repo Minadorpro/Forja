@@ -378,7 +378,7 @@ label.btn{cursor:pointer}
 .me-tx b{font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .me-tx small{font-size:11px;color:var(--side-muted);display:flex;align-items:center;gap:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cdot2{width:7px;height:7px;border-radius:50%;background:var(--side-muted);flex:none;display:inline-block}
-.cdot2.on{background:#2CC48E}
+.cdot2.on{background:#2CC48E}.cdot2.bad{background:#F05252}
 .sync[hidden]{display:none}
 @media (min-width:901px){body.side-mini .me-tx{display:none}body.side-mini .me{justify-content:center}}
 @media (min-width:1700px){.kpi .k-val{font-size:46px}.title{font-size:44px}}
@@ -543,7 +543,7 @@ const LS='forja-fitness-v1';
 function defaults(){
   const t=today();
   return {
-    settings:{name:'Jefferson',kcal:2400,protein:160,carbs:260,fat:75,water:3000,weeklyWorkouts:4,tol:10},
+    settings:{name:'',kcal:2400,protein:160,carbs:260,fat:75,water:3000,weeklyWorkouts:4,tol:10},
     routines:[
       {id:nid(),name:'Empuje: pecho y hombro',focus:'Empuje',color:COLORS[0],days:[0,3],exercises:[
         {name:'Press banca',sets:4,reps:8,weight:60},{name:'Press militar',sets:3,reps:10,weight:35},
@@ -563,8 +563,18 @@ let S=loadLocal()||defaults();
 let dirty=new Set(), remote=null, saving=false, flushTimer=null;
 const ui={calMonth:today().slice(0,7),calSel:today(),mealDate:today()};
 
-function loadLocal(){try{const raw=localStorage.getItem(LS);return raw?normalize(JSON.parse(raw)):null}catch(e){return null}}
-function saveLocal(){try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}}
+let CURUID=null;
+const lsKey=()=>CURUID?LS+':'+CURUID:LS;
+function loadLocal(){try{const raw=localStorage.getItem(lsKey());return raw?normalize(JSON.parse(raw)):null}catch(e){return null}}
+function saveLocal(){try{localStorage.setItem(lsKey(),JSON.stringify(S))}catch(e){}}
+/* cada cuenta guarda sus datos aparte en este navegador; la primera que entra hereda los datos antiguos */
+function useAccount(uid){
+  if(CURUID===uid)return;CURUID=uid;let d=loadLocal();
+  SYNC.legacy=false;if(!d){try{const legacy=localStorage.getItem(LS);if(legacy){d=normalize(JSON.parse(legacy));localStorage.removeItem(LS);localStorage.setItem('forja-legacy:'+uid,'1')}}catch(e){}}
+  try{SYNC.legacy=localStorage.getItem('forja-legacy:'+uid)==='1'}catch(e){}
+  if(!d){d=defaults();const em=(FB.user&&FB.user.email||'').split('@')[0];d.settings.name=em?em.charAt(0).toUpperCase()+em.slice(1):''}S=d;saveLocal();
+  try{SYNC.localAt=+localStorage.getItem('forja-sync-at:'+uid)||0}catch(e){SYNC.localAt=0}
+}
 function normalize(o){const d=defaults();return{settings:{...d.settings,...(o.settings||{})},routines:o.routines||[],schedule:o.schedule||[],workouts:o.workouts||[],meals:o.meals||[],water:o.water||{},weights:o.weights||[],challenges:o.challenges||[],foods:o.foods||[]}}
 
 /* documentos en la base: secciones + un documento por mes para entrenos y comidas */
@@ -590,7 +600,7 @@ function fromDocs(docs){
   });
   return normalize(o);
 }
-function touch(...keys){keys.forEach(k=>dirty.add(k));saveLocal();clearTimeout(flushTimer);flushTimer=setTimeout(flush,700);schedulePublish();scheduleCloud()}
+function touch(...keys){keys.forEach(k=>dirty.add(k));saveLocal();clearTimeout(flushTimer);flushTimer=setTimeout(flush,700);schedulePublish();if(CURUID){markLocal();scheduleSync()}}
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 async function flush(){
   if(!remote||!dirty.size)return;
@@ -1619,7 +1629,7 @@ const A={
   'share-copy':async el=>{const c=S.challenges.find(x=>x.id===el.dataset.id);try{await navigator.clipboard.writeText(shareLink(c));toast('Enlace copiado')}catch(e){$('#share-url').select();toast('Selecciona y copia con Ctrl+C')}},
   'fb-setup':el=>fbSetupModal(()=>render()),
   'fb-login':()=>withAuth(()=>{render();schedulePublish()}),
-  'fb-logout':async()=>{try{await FB.auth.signOut();FB.user=null;FB.uid=null;if(gateActive()){GATE.mode='login';GATE.msg='Sesión cerrada.';GATE.ok=true;renderGate()}else{render();toast('Sesión cerrada')}}catch(e){toast('No se pudo cerrar sesión')}},
+  'fb-logout':async()=>{try{if(SYNC.timer&&SYNC.ready){clearTimeout(SYNC.timer);await pushSync()}await FB.auth.signOut();FB.user=null;FB.uid=null;stopSync();if(gateActive()){CURUID=null;S=defaults()}if(gateActive()){GATE.mode='login';GATE.msg='Sesión cerrada.';GATE.ok=true;renderGate()}else{render();toast('Sesión cerrada')}}catch(e){toast('No se pudo cerrar sesión')}},
   'task-set':el=>setTask(el.dataset.sid,el.dataset.id,el.dataset.v),
   'task-del':el=>{const sid=el.dataset.sid,id=el.dataset.id;confirmBox('¿Eliminar este reto asignado?',()=>withAuth(async()=>{try{await FB.db.collection('shares').doc(sid).collection('tasks').doc(id).delete()}catch(e){toast('No se pudo eliminar')}}))},
   'v-task':async el=>{const title=$('#tk-title').value.trim(),note=$('#tk-note').value.trim(),name=($('#tk-name').value||'').trim();
@@ -1630,11 +1640,11 @@ const A={
       try{localStorage.setItem('forja-fb-name',name)}catch(_){}V.keep=null;$('#tk-title').value='';$('#tk-note').value='';toast('Reto asignado ✓')}
     catch(e){$('#tk-st').textContent='No se pudo enviar. Inténtalo de nuevo.'}finally{el.disabled=false}},
   'bk-download':()=>downloadBackup(),
-  'cloud-save':()=>{CLOUD.ready=true;cloudSave(false)},
+  'cloud-save':()=>{SYNC.ready=true;pushSync().then(()=>toast(SYNC.msg||'Sincronizado ✓'))},
   'cloud-restore':async()=>{if(!cloudOk())return;try{const d=await cloudFetch();if(!d){toast('Aún no hay ninguna copia en la nube');return}confirmRestore(readBackup(d.data),'de la nube del '+dateTime(d.updatedAt))}catch(e){toast(e.code==='permission-denied'?'Sin permiso: actualiza las reglas de Firestore':(e.message||'No se pudo leer la copia'))}},
   'pf-verify':async()=>{try{await FB.user.sendEmailVerification();toast('Te enviamos un email de verificación')}catch(e){toast(authMsg(e))}},
   'copy-rules':async()=>{try{await navigator.clipboard.writeText(FB_RULES);toast('Reglas copiadas. Pégalas en Firestore → Regole y pulsa Pubblica')}catch(e){exportText(FB_RULES)}},
-  'wipe':()=>confirmBox('¿Borrar todos los datos de este navegador? Entrenos, comidas, retos y rutinas desaparecerán de aquí. Tu copia en la nube y tus archivos descargados no se tocan.',()=>{const fb=S.settings.fb,name=S.settings.name;S=defaults();S.settings.fb=fb;S.settings.name=name;CLOUD.ready=false;try{localStorage.removeItem(LS)}catch(e){}allKeys().forEach(k=>dirty.add(k));saveLocal();toast('Datos borrados de este navegador')},'Borrar todo'),
+  'wipe':()=>confirmBox('¿Borrar todos los datos de este navegador? Entrenos, comidas, retos y rutinas desaparecerán de aquí. Tus datos de la cuenta y tus archivos descargados no se tocan: se volverán a cargar desde tu cuenta.',()=>{const fb=S.settings.fb,name=S.settings.name;S=defaults();S.settings.fb=fb;S.settings.name=name;try{localStorage.removeItem(lsKey())}catch(e){}allKeys().forEach(k=>dirty.add(k));saveLocal();if(cloudOk()){SYNC.localAt=0;stopSync();startSync();toast('Datos del navegador borrados. Recargando tu cuenta…')}else toast('Datos borrados de este navegador')},'Borrar todo'),
   'side-toggle':()=>{const mini=!document.body.classList.contains('side-mini');document.body.classList.toggle('side-mini',mini);try{localStorage.setItem('forja-side',mini?'mini':'full')}catch(e){}const b=$('.side-toggle');b.setAttribute('aria-label',mini?'Expandir menú':'Contraer menú');b.title=mini?'Expandir menú':'Contraer menú'},
   'gate-mode':()=>{GATE.mode=GATE.mode==='login'?'new':'login';GATE.msg='';GATE.email=($('#g-email')||{}).value||GATE.email;renderGate()},
   'gate-forgot':async()=>{const em=($('#g-email').value||'').trim();GATE.email=em;if(!em){GATE.msg='Escribe tu email y vuelve a pulsar «¿Olvidaste la contraseña?».';GATE.ok=false;renderGate();return}
@@ -1773,26 +1783,63 @@ async function cloudSave(silent){
 }
 async function cloudFetch(){const s=await FB.db.collection('backups').doc(FB.uid).get();return s.exists?s.data():null}
 function scheduleCloud(){if(!cloudOk()||!cloudAuto()||!CLOUD.ready)return;clearTimeout(CLOUD.timer);CLOUD.timer=setTimeout(()=>cloudSave(true),15000)}
-async function cloudCheck(){
-  if(!cloudOk()||CLOUD.checked)return;CLOUD.checked=true;
-  try{const d=await cloudFetch();
-    if(d){CLOUD.at=d.updatedAt;CLOUD.size=d.size||0;
-      const empty=!S.workouts.length&&!S.meals.length&&!S.weights.length;
-      if(empty){let n;try{n=readBackup(d.data)}catch(e){CLOUD.ready=true;return}
-        openModal({title:'Copia encontrada',body:()=>`<p style="margin:0">Tu cuenta tiene una copia en la nube del <b>${dateTime(d.updatedAt)}</b>:</p><div class="okbox">${backupSummary(n)}</div><p class="note" style="margin:0">En este navegador no hay datos todavía. ¿Quieres cargar la copia?</p>`,
-          foot:()=>`<button class="btn" data-m="no">Empezar de cero</button><button class="btn pri" data-m="yes">Cargar mi copia</button>`,
-          act:a=>{if(a==='yes'){applyBackup(n);CLOUD.ready=true;closeModal();toast('Datos cargados ✓')}if(a==='no'){CLOUD.ready=true;closeModal()}}});
-        return}
-    }
-    CLOUD.ready=true;if(location.hash==='#perfil'&&!M)render();
-  }catch(e){CLOUD.ready=false;CLOUD.msg=e.code==='permission-denied'?'Sin permiso para la copia en la nube: actualiza las reglas de Firestore (ver abajo).':'';if(location.hash==='#perfil'&&!M)render()}
+/* sincronización en tiempo real: backups/{uid} */
+const DEVICE=(()=>{try{let d=localStorage.getItem('forja-device');if(!d){d=nid();localStorage.setItem('forja-device',d)}return d}catch(e){return nid()}})();
+const SYNC={unsub:null,uid:null,at:null,timer:null,busy:false,msg:'',ready:false,localAt:0};
+function markLocal(){SYNC.localAt=Date.now();try{localStorage.setItem('forja-sync-at:'+CURUID,SYNC.localAt)}catch(e){}}
+function stopSync(){SYNC.unsub&&SYNC.unsub();SYNC.unsub=null;SYNC.uid=null;SYNC.ready=false;SYNC.at=null;SYNC.msg='';clearTimeout(SYNC.timer)}
+function applyRemote(d){
+  try{const n=readBackup(d.data);const fb=S.settings.fb;S=n;if(!S.settings.fb&&fb)S.settings.fb=fb;
+    SYNC.localAt=d.updatedAt||Date.now();try{localStorage.setItem('forja-sync-at:'+CURUID,SYNC.localAt)}catch(e){}
+    saveLocal();if(APP_STARTED)render()}catch(e){}
 }
+function startSync(){
+  if(!cloudOk()||SYNC.uid===FB.uid)return;
+  stopSync();SYNC.uid=FB.uid;
+  SYNC.unsub=FB.db.collection('backups').doc(FB.uid).onSnapshot(snap=>{
+    if(snap.metadata&&snap.metadata.hasPendingWrites)return;
+    const d=snap.exists?snap.data():null;
+    if(!SYNC.ready){SYNC.ready=true;SYNC.msg='';
+      if(!d){pushSync();return}
+      SYNC.at=d.updatedAt;
+      if(SYNC.legacy){let n=null;try{n=readBackup(d.data)}catch(e){}
+        const same=n&&JSON.stringify({...n,settings:{...n.settings,fb:null,lastBackup:null}})===JSON.stringify({...S,settings:{...S.settings,fb:null,lastBackup:null}});
+        if(!(n&&!same)){SYNC.legacy=false;try{localStorage.removeItem('forja-legacy:'+CURUID)}catch(e){}}
+        if(n&&!same&&(S.workouts.length||S.meals.length||S.weights.length||S.challenges.length||S.routines.length)){syncConflict(n,d);renderAcct();return}}
+      if((d.updatedAt||0)>=SYNC.localAt)applyRemote(d);else pushSync();
+      renderAcct();return}
+    if(d&&d.device!==DEVICE&&(d.updatedAt||0)>SYNC.localAt){applyRemote(d);toast('Datos actualizados desde otro dispositivo')}
+    if(d){SYNC.at=d.updatedAt;renderAcct()}
+  },e=>{SYNC.msg=e.code==='permission-denied'?'Sin permiso para sincronizar: publica las reglas actualizadas (Perfil → Copiar reglas).':'Sin conexión con la nube. Se sincronizará al volver.';renderAcct();if(location.hash==='#perfil'&&!M)render()});
+}
+function syncConflict(n,d){
+  const mine=JSON.parse(JSON.stringify(S));
+  SYNC.ready=false;
+  openModal({title:'¿Qué datos conservamos?',body:()=>`<p style="margin:0">Activamos la sincronización automática. Este dispositivo y tu cuenta tienen datos distintos. Elige cuáles quieres usar en <b>todos</b> tus dispositivos:</p>
+    <div class="stack"><div class="exblock"><b>Los de este dispositivo</b><div class="note">${backupSummary(mine)} · objetivo ${fmt(mine.settings.kcal)} kcal</div></div>
+    <div class="exblock"><b>Los de tu cuenta en la nube</b><div class="note">${backupSummary(n)} · objetivo ${fmt(n.settings.kcal)} kcal · guardados el ${dateTime(d.updatedAt)}</div></div></div>
+    <p class="note" style="margin:0">Solo te lo preguntamos esta vez. Si dudas, elige el dispositivo donde registraste lo último.</p>`,
+    foot:()=>`<button class="btn" data-m="cloud">Usar los de la nube</button><button class="btn pri" data-m="local">Usar los de este dispositivo</button>`,
+    act:a=>{if(a==='local'||a==='cloud'){SYNC.legacy=false;try{localStorage.removeItem('forja-legacy:'+CURUID)}catch(e){}}
+      if(a==='local'){SYNC.ready=true;markLocal();closeModal();pushSync();toast('Sincronización activada ✓')}
+      if(a==='cloud'){SYNC.ready=true;applyRemote(d);closeModal();toast('Datos cargados desde tu cuenta ✓')}}});
+}
+function scheduleSync(){if(!SYNC.ready||!cloudOk())return;clearTimeout(SYNC.timer);SYNC.timer=setTimeout(pushSync,1200)}
+async function pushSync(){
+  if(!cloudOk())return;const js=backupJSON();
+  if(js.length>950000){SYNC.msg='Tus datos superan el tamaño máximo de la nube. Descarga una copia y avísame.';renderAcct();return}
+  const at=Math.max(Date.now(),SYNC.localAt);SYNC.busy=true;renderAcct();
+  try{await FB.db.collection('backups').doc(FB.uid).set({app:'forja',data:js,size:js.length,updatedAt:at,device:DEVICE});SYNC.at=at;SYNC.msg=''}
+  catch(e){SYNC.msg=e.code==='permission-denied'?'Sin permiso para sincronizar: publica las reglas actualizadas (Perfil → Copiar reglas).':'No se pudo sincronizar. Se reintentará con el próximo cambio.'}
+  finally{SYNC.busy=false;renderAcct();if(location.hash==='#perfil'&&!M)render()}
+}
+const cloudCheck=startSync;
 function authErr(e){const c=e&&e.code||'';return c==='auth/invalid-credential'||c==='auth/wrong-password'||c==='auth/invalid-login-credentials'?'La contraseña actual no es correcta.':c==='auth/requires-recent-login'?'Por seguridad, cierra sesión y vuelve a entrar, luego inténtalo de nuevo.':authMsg(e)}
 async function reauth(pass){const cred=firebase.auth.EmailAuthProvider.credential(FB.user.email,pass);await FB.user.reauthenticateWithCredential(cred)}
 
 function vPerfil(){
   const u=FB.user,g=S.settings,hasFb=!!fbCfg()&&!inClaude();
-  if(cloudOk()&&!CLOUD.checked)cloudCheck();
+  if(cloudOk())startSync();
   const ini=(g.name||u?.email||'?').trim().slice(0,1).toUpperCase();
   const since=u&&u.metadata&&u.metadata.creationTime?new Date(u.metadata.creationTime).toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'}):'';
   const msg=o=>o.msg?`<div class="${o.ok?'okbox':'warnbox'}" style="margin:0">${esc(o.msg)}</div>`:'';
@@ -1810,12 +1857,11 @@ function vPerfil(){
       <form id="pfPass" class="stack"><div class="field"><label for="pf-cp">Contraseña actual</label>${pw('pf-cp','','current-password')}</div>
       <div class="frow g2"><div class="field"><label for="pf-np">Nueva contraseña</label>${pw('pf-np','Mínimo 6 caracteres','new-password')}</div><div class="field"><label for="pf-np2">Repite la nueva</label>${pw('pf-np2','','new-password')}</div></div>
       ${msg(PF.pass)}<div><button class="btn pri" type="submit" ${PF.pass.busy?'disabled':''}>${PF.pass.busy?'Un momento…':'Cambiar contraseña'}</button></div></form></div>`;
-  const cloud=!hasFb||!u?`<div class="note">${hasFb?'Inicia sesión para guardar copias en la nube.':'Disponible cuando conectes Firebase en tu versión de GitHub.'}</div>`
-   :`<div class="bk-row"><div><b>Copia automática</b><div class="note">Guarda tus datos en tu cuenta unos segundos después de cada cambio.</div></div><label class="switch"><input type="checkbox" data-act-change="cloud-auto" ${cloudAuto()?'checked':''}><span></span></label></div>
-     <div class="note">Última copia en la nube: <b>${CLOUD.busy?'guardando…':dateTime(CLOUD.at)}</b>${CLOUD.size?` · ${kb(CLOUD.size)}`:''}</div>
-     ${CLOUD.msg?`<div class="warnbox" style="margin:0">${esc(CLOUD.msg)}</div>`:''}
-     <div class="actions"><button class="btn goal" data-act="cloud-save" ${CLOUD.busy?'disabled':''}>Guardar ahora</button><button class="btn" data-act="cloud-restore">Restaurar desde la nube</button></div>
-     <div class="note">Si entras desde otro móvil u ordenador, la app te ofrecerá cargar esta copia.</div>`;
+  const cloud=!hasFb||!u?`<div class="note">${hasFb?'Inicia sesión para sincronizar tus dispositivos.':'Disponible en tu versión de GitHub.'}</div>`
+   :`<div class="bk-row"><div><b>${SYNC.msg?'Sincronización con problemas':'Sincronización activa'}</b><div class="note">Todo lo que registras se guarda solo en tu cuenta y aparece en tus otros dispositivos en unos segundos.</div></div><span class="chip ${SYNC.msg?'acc':'done'}">${SYNC.msg?'Revisar':'✓ Activa'}</span></div>
+     <div class="note">Última sincronización: <b>${SYNC.busy?'guardando…':dateTime(SYNC.at)}</b></div>
+     ${SYNC.msg?`<div class="warnbox" style="margin:0">${esc(SYNC.msg)}</div>`:''}
+     <div class="actions"><button class="btn" data-act="cloud-save" ${SYNC.busy?'disabled':''}>Sincronizar ahora</button></div>`;
   return topbar('Cuenta','Perfil')+
   `<div class="grid split">
     <div class="stack">
@@ -1837,8 +1883,8 @@ function vPerfil(){
           <div class="actions"><button class="btn pri" data-act="bk-download">Descargar copia (.json)</button><label class="btn" for="bk-file">Restaurar desde archivo</label><input type="file" id="bk-file" accept=".json,application/json" hidden></div>
           <div class="note">Guarda el archivo en Google Drive, en tu email o en tu ordenador. Si se borra el navegador, lo restauras aquí.</div>
         </div></div>
-      <div class="card"><div class="card-h"><h3>Copia en la nube</h3></div><div class="stack">${cloud}</div></div>
-      ${hasFb&&u?`<div class="card"><div class="card-h"><h3>Reglas de Firestore</h3></div><p class="note" style="margin:0 0 10px">La copia en la nube necesita las reglas actualizadas. Si ves «Sin permiso», cópialas y publícalas de nuevo en Firebase → Firestore → Regole.</p><button class="btn sm" data-act="copy-rules">Copiar reglas actualizadas</button></div>`:''}
+      <div class="card"><div class="card-h"><h3>Sincronización</h3></div><div class="stack">${cloud}</div></div>
+      ${hasFb&&u?`<div class="card"><div class="card-h"><h3>Reglas de Firestore</h3></div><p class="note" style="margin:0 0 10px">La sincronización y los retos asignados necesitan las reglas actualizadas. Si ves «Sin permiso», cópialas y publícalas de nuevo en Firebase → Firestore → Regole.</p><button class="btn sm" data-act="copy-rules">Copiar reglas actualizadas</button></div>`:''}
       <div class="card danger-zone"><div class="card-h"><h3>Zona de peligro</h3></div><p class="note" style="margin:0 0 10px">Borra todos los datos guardados en este navegador. Haz una copia antes.</p><button class="btn danger" data-act="wipe">Borrar datos de este navegador</button></div>
     </div>
   </div>`;
@@ -1868,13 +1914,16 @@ const GATE={mode:'login',msg:'',ok:false,busy:false,email:'',loading:false,err:'
 let APP_STARTED=false;
 const gateActive=()=>!VIEWER&&!inClaude()&&!!fbCfg();
 function startApp(){
-  if(APP_STARTED){render();schedulePublish();cloudCheck();return}
+  if(gateActive()&&FB.uid)useAccount(FB.uid);
+  if(APP_STARTED){render();schedulePublish();startSync();return}
   APP_STARTED=true;render();if(!loadLocal())saveLocal();setSync('local');connect();
-  if(fbCfg()&&!inClaude())fbInit(fbCfg(),false).then(()=>{ensureTaskSubs();render();schedulePublish();cloudCheck()}).catch(()=>{});
+  if(fbCfg()&&!inClaude())fbInit(fbCfg(),false).then(()=>{ensureTaskSubs();render();schedulePublish();startSync()}).catch(()=>{});
 }
 function onAuthChange(u){
-  CLOUD.checked=false;CLOUD.ready=false;CLOUD.at=null;CLOUD.msg='';PF.email.msg='';PF.pass.msg='';
-  if(u&&!gateActive()&&APP_STARTED)cloudCheck();
+  PF.email.msg='';PF.pass.msg='';
+  if(!u||u.uid!==SYNC.uid)stopSync();
+  if(!u&&gateActive()){CURUID=null;S=defaults()}
+  if(u&&!gateActive()&&APP_STARTED)startSync();
   if(gateActive()){if(u){hideGate();startApp()}else{renderGate()}}
   else{if(u)schedulePublish();if(APP_STARTED)render()}
 }
@@ -1903,8 +1952,8 @@ function renderAcct(){
   const el=$('#acct-side');if(!el)return;
   if(!FB.user||inClaude()){el.innerHTML='';return}
   const name=S.settings.name||'Mi perfil',ini=name.trim().slice(0,1).toUpperCase();
-  const cl=cloudAuto()?(CLOUD.busy?'Guardando…':CLOUD.at?'Guardado '+new Date(CLOUD.at).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'}):'Nube activada'):'Nube desactivada';
-  el.innerHTML=`<div class="acct-side"><a class="me" href="#perfil" title="Ir a mi perfil"><span class="me-av">${esc(ini)}</span><span class="me-tx"><b>${esc(name)}</b><small><i class="cdot2 ${cloudAuto()&&CLOUD.at?'on':''}"></i>${cl}</small></span></a><button class="side-out" data-act="fb-logout" title="Cerrar sesión" aria-label="Cerrar sesión"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg><span>Cerrar sesión</span></button></div>`;
+  const cl=SYNC.msg?'Sin sincronizar':SYNC.busy?'Sincronizando…':SYNC.at?'Sincronizado '+new Date(SYNC.at).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'}):'Conectando…';
+  el.innerHTML=`<div class="acct-side"><a class="me" href="#perfil" title="Ir a mi perfil"><span class="me-av">${esc(ini)}</span><span class="me-tx"><b>${esc(name)}</b><small><i class="cdot2 ${SYNC.msg?'bad':SYNC.at?'on':''}"></i>${cl}</small></span></a><button class="side-out" data-act="fb-logout" title="Cerrar sesión" aria-label="Cerrar sesión"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg><span>Cerrar sesión</span></button></div>`;
 }
 
 /* ---------- render ---------- */
