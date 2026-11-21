@@ -382,6 +382,46 @@ label.btn{cursor:pointer}
 .sync[hidden]{display:none}
 @media (min-width:901px){body.side-mini .me-tx{display:none}body.side-mini .me{justify-content:center}}
 @media (min-width:1700px){.kpi .k-val{font-size:46px}.title{font-size:44px}}
+.subnav{padding-left:22px!important;font-size:13px}
+.subnav svg{width:16px!important;height:16px!important}
+body.side-mini .subnav{padding-left:0!important}
+.seg{display:inline-flex;background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:3px;gap:2px}
+.seg a{padding:7px 14px;border-radius:8px;text-decoration:none;color:var(--muted);font-weight:800;font-size:13px}
+.seg a.on{background:var(--ink);color:var(--surface)}
+.ph{position:relative;display:block;border-radius:12px;overflow:hidden;background:var(--surface-2);border:1px solid var(--line);aspect-ratio:3/4}
+.ph.big{aspect-ratio:auto;max-height:60vh}
+.ph.sm{width:96px;aspect-ratio:1/1;margin-top:6px}
+.ph img{width:100%;height:100%;object-fit:cover;display:block}
+.ph.big img{object-fit:contain;max-height:60vh;background:#000}
+.ph .ph-fb,.phc-img .ph-fb{display:none;position:absolute;inset:0;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:800;color:var(--muted);text-align:center;padding:8px}
+.ph.broken img,.phc-img.broken img{display:none}
+.ph.broken,.phc-img.broken{min-height:120px}
+.ph.broken .ph-fb,.phc-img.broken .ph-fb{display:flex}
+.m-body>*{flex-shrink:0}
+.ph-prev .ph.big,.ph-prev .ph.big img{max-height:300px}
+.ph-view .ph.big,.ph-view .ph.big img{max-height:65vh}
+.ph-prev{min-height:60px;display:grid;place-items:center;border:1px dashed var(--line);border-radius:12px;padding:8px}
+.ph-prev:empty{display:none}
+.ph-prev .ph{width:100%}
+.phgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
+.phc{display:flex;flex-direction:column;gap:4px;border:0;background:transparent;padding:0;cursor:pointer;text-align:left;font:inherit;color:inherit}
+.phc-img{position:relative;display:block;border-radius:12px;overflow:hidden;aspect-ratio:3/4;background:var(--surface-2);border:1px solid var(--line)}
+.phc-img img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .2s}
+.phc:hover .phc-img img{transform:scale(1.03)}
+.phc-t{font-size:12.5px}.phc-n{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.cmp .ph{aspect-ratio:3/4;max-height:none}.cmp .ph img{object-fit:cover;background:transparent;max-height:none}
+.rcam{color:var(--goal);display:inline-flex}.rd.st-ok .rcam{color:#fff}
+.wline{display:flex;gap:6px;margin-top:6px;max-width:220px}
+.wrow{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+.wrow>div{display:flex;flex-direction:column;gap:2px;padding:10px;border-radius:10px;background:var(--surface-2)}
+.wrow b{font:700 24px/1 var(--display)}
+.vw{display:flex;gap:16px;flex-wrap:wrap;margin-top:10px;font-size:13.5px}
+.tk-reply{grid-column:2/-1;padding:8px 10px;border-radius:10px;background:var(--surface);border-left:3px solid var(--food);font-size:13px;display:flex;flex-direction:column;gap:4px}
+.day-st{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.mini{display:flex;flex-direction:column;gap:2px;padding:12px;border-radius:12px;background:var(--surface-2);border:1px solid var(--line)}
+.mini b{font:700 26px/1.1 var(--display)}
+@media (max-width:560px){.cmp{grid-template-columns:1fr 1fr;gap:8px}.wrow b{font-size:20px}}
 .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--surface);padding:10px 16px;border-radius:10px;font-weight:700;z-index:60;box-shadow:var(--shadow)}
 .toast[hidden]{display:none}
 .note{font-size:12.5px;color:var(--muted);font-weight:600}
@@ -457,9 +497,10 @@ const ICON={
  comidas:'<path d="M7 3v8a2 2 0 0 0 2 2v8M11 3v8M7 7h4M17 3c-2 0-3 2.5-3 6s1 4 3 4v8"/>',
  retos:'<path d="M8 21h8M12 17v4M6 4h12v4a6 6 0 0 1-12 0zM6 6H3v1a3 3 0 0 0 3 3M18 6h3v1a3 3 0 0 1-3 3"/>',
  progreso:'<path d="M4 19h16M6 15l4-5 3 3 5-7"/>',
- perfil:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>'
+ perfil:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+ fotos:'<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>'
 };
-const ROUTES=[['panel','Panel'],['calendario','Calendario'],['rutinas','Rutinas'],['comidas','Comidas'],['retos','Retos'],['progreso','Progreso'],['perfil','Perfil']];
+const ROUTES=[['panel','Panel'],['calendario','Calendario'],['rutinas','Rutinas'],['comidas','Comidas'],['retos','Retos'],['progreso','Progreso'],['fotos','Fotos'],['perfil','Perfil']];
 const ico=k=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICON[k]}</svg>`;
 
 /* ---------- biblioteca de alimentos: valores por 100 g (o 100 ml) + unidades de medida ---------- */
@@ -555,7 +596,7 @@ function defaults(){
         {name:'Sentadilla',sets:4,reps:8,weight:80},{name:'Peso muerto rumano',sets:3,reps:10,weight:70},
         {name:'Prensa',sets:3,reps:12,weight:140},{name:'Zancadas',sets:3,reps:12,weight:16},{name:'Gemelos',sets:4,reps:15,weight:40}]}
     ],
-    schedule:[],workouts:[],meals:[],water:{},weights:[],foods:[],
+    schedule:[],workouts:[],meals:[],water:{},weights:[],foods:[],photos:[],
     challenges:[{id:nid(),name:'30 días de constancia',desc:'Moverte al menos 30 minutos cada día: gym, caminar o cardio.',kind:'habit',start:t,days:30,target:30,unit:'días',color:COLORS[1],log:{}}]
   };
 }
@@ -575,11 +616,11 @@ function useAccount(uid){
   if(!d){d=defaults();const em=(FB.user&&FB.user.email||'').split('@')[0];d.settings.name=em?em.charAt(0).toUpperCase()+em.slice(1):''}S=d;saveLocal();
   try{SYNC.localAt=+localStorage.getItem('forja-sync-at:'+uid)||0}catch(e){SYNC.localAt=0}
 }
-function normalize(o){const d=defaults();return{settings:{...d.settings,...(o.settings||{})},routines:o.routines||[],schedule:o.schedule||[],workouts:o.workouts||[],meals:o.meals||[],water:o.water||{},weights:o.weights||[],challenges:o.challenges||[],foods:o.foods||[]}}
+function normalize(o){const d=defaults();return{settings:{...d.settings,...(o.settings||{})},routines:o.routines||[],schedule:o.schedule||[],workouts:o.workouts||[],meals:o.meals||[],water:o.water||{},weights:o.weights||[],challenges:o.challenges||[],foods:o.foods||[],photos:o.photos||[]}}
 
 /* documentos en la base: secciones + un documento por mes para entrenos y comidas */
 const months=()=>{const s=new Set();S.workouts.forEach(w=>s.add(w.date.slice(0,7)));S.meals.forEach(m=>s.add(m.date.slice(0,7)));Object.keys(S.water).forEach(d=>s.add(d.slice(0,7)));return[...s]};
-const allKeys=()=>['settings','routines','schedule','body','challenges','foods',...months().flatMap(m=>['w-'+m,'m-'+m])];
+const allKeys=()=>['settings','routines','schedule','body','challenges','foods','photos',...months().flatMap(m=>['w-'+m,'m-'+m])];
 function docBody(k){
   if(k==='settings')return{v:S.settings};
   if(k==='routines')return{items:S.routines};
@@ -587,13 +628,14 @@ function docBody(k){
   if(k==='body')return{weights:S.weights};
   if(k==='challenges')return{items:S.challenges};
   if(k==='foods')return{items:S.foods};
+  if(k==='photos')return{items:S.photos};
   const m=k.slice(2);
   if(k.startsWith('w-'))return{items:S.workouts.filter(w=>w.date.startsWith(m))};
   const water={};Object.keys(S.water).forEach(d=>{if(d.startsWith(m))water[d]=S.water[d]});
   return{items:S.meals.filter(x=>x.date.startsWith(m)),water};
 }
 function fromDocs(docs){
-  const o={settings:docs.settings?.v,routines:docs.routines?.items,schedule:docs.schedule?.items,weights:docs.body?.weights,challenges:docs.challenges?.items,foods:docs.foods?.items,workouts:[],meals:[],water:{}};
+  const o={settings:docs.settings?.v,routines:docs.routines?.items,schedule:docs.schedule?.items,weights:docs.body?.weights,challenges:docs.challenges?.items,foods:docs.foods?.items,photos:docs.photos?.items,workouts:[],meals:[],water:{}};
   Object.keys(docs).forEach(k=>{
     if(k.startsWith('w-'))o.workouts.push(...(docs[k].items||[]));
     if(k.startsWith('m-')){o.meals.push(...(docs[k].items||[]));Object.assign(o.water,docs[k].water||{})}
@@ -730,10 +772,11 @@ function kcalGauge(k,lo,hi){
 
 /* ---------- panel de un reto ---------- */
 function ownerInfo(c){const t=today();return d=>{
-  if(c.kind==='goal'){const v=num(c.log?.[d]);const full=v>=num(c.target)/c.days;return d>t?{st:'fut'}:{st:v?(full?'ok':'part'):d===t?'pend':'miss',sub:v?fmt(v,1):'',lab:v?fmt(v,1)+' '+c.unit:''}}
+  if(c.kind==='goal'){const v=num(c.log?.[d]);const full=v>=num(c.target)/c.days;const kg=c.trackWeight?weightOn(d):null;const hasPh=S.photos.some(p=>p.date===d&&p.chId===c.id);return d>t?{st:'fut'}:{st:v?(full?'ok':'part'):d===t?'pend':'miss',ic:hasPh?`<span class="rcam">${CAM}</span>`:'',sub:[v?fmt(v,1):'',kg?fmt(kg,1)+'kg':''].filter(Boolean).join(' · '),lab:v?fmt(v,1)+' '+c.unit:''}}
   const chk=dayCheck(c,d),done=dayDone(c,d),v=verifyOf(c);
   const tks=c.share&&c.share.on?tasksOn(d,c.share.id).length:0;
-  const ic=(chk.ws.length?DUMB:'')+(tks?`<span class="rstar">${STAR}</span>`:'');const sub=(v==='kcal'||v==='both')&&chk.n?fmt(chk.kcal):'';
+  const kg=c.trackWeight?weightOn(d):null,hasPh=S.photos.some(p=>p.date===d&&p.chId===c.id);
+  const ic=(chk.ws.length?DUMB:'')+(hasPh?`<span class="rcam">${CAM}</span>`:'')+(tks?`<span class="rstar">${STAR}</span>`:'');const sub=[(v==='kcal'||v==='both')&&chk.n?fmt(chk.kcal):'',kg?fmt(kg,1)+'kg':''].filter(Boolean).join(' · ');
   if(d>t)return{st:'fut',ic:tks?`<span class="rstar">${STAR}</span>`:''};
   return{st:done?'ok':d===t?'pend':'miss',ic,sub,lab:done?'cumplido':'no cumplido'};
 }}
@@ -766,6 +809,8 @@ function vReto(id){
     </div>
     <div class="stack">
       <div class="card rule" style="--c:${c.color}"><div class="card-h"><h3>Cómo se valida</h3></div><p style="margin:0">${ruleText(c)}</p>${v==='manual'&&c.kind==='habit'?'<div class="note" style="margin-top:8px">Edita el reto para exigir calorías o entreno: así nadie puede marcar un día sin cumplirlo.</div>':''}</div>
+      ${weightCard(c)}
+      ${challengePhotosCard(c)}
       ${shareCard(c)}
       ${feedbackCard(c)}
     </div>
@@ -789,7 +834,9 @@ function ownerDayPanel(c,d){
     ${tks.length?`<div class="lbl" style="margin-bottom:8px">Retos asignados</div><div class="stack" style="margin-bottom:12px">${tks.map(x=>taskRow(x,true)).join('')}</div>`:''}
     ${checks.length?`<div class="stack">${checks.join('')}</div>`:''}
     ${!fut&&!chk.ok&&chk.msgs.length&&c.kind==='habit'&&v!=='manual'?`<div class="warnbox">${chk.msgs.map(esc).join(' · ')}</div>`:''}
-    ${btn?`<div class="actions" style="margin-top:12px">${btn}</div>`:''}</div>`;
+    ${c.trackWeight&&!fut?`<div class="chk-row ${weightOn(d)?'ok':''}" style="margin-top:10px"><span class="cdot">${weightOn(d)?'✓':'–'}</span><div style="flex:1"><b>Peso del día</b><div class="wline"><input class="in sm num" id="dw-kg" value="${weightOn(d)?fmt(weightOn(d),1).replace(',','.'):''}" inputmode="decimal" placeholder="kg" aria-label="Peso del día en kg"><button class="btn sm" data-act="ch-weight" data-d="${d}">Guardar</button></div></div></div>`:''}
+    ${(()=>{const ph=photosOn(d,c.id);return ph.length?`<div class="lbl" style="margin:14px 0 8px">Fotos del día</div><div class="phgrid">${ph.map(thumb).join('')}</div>`:''})()}
+    <div class="actions" style="margin-top:12px">${btn}<button class="btn" data-act="day-open" data-d="${d}" data-id="${c.id}">Abrir día completo</button>${fut?'':`<button class="btn ghost" data-act="photo-add" data-ch="${c.id}" data-d="${d}">${CAM} Foto</button>`}</div></div>`;
 }
 
 /* ---------- Firebase (solo en la versión de GitHub) ---------- */
@@ -922,6 +969,7 @@ function shareCard(c){
       <div class="note">Quien tenga el enlace verá el calendario del reto, si cumples cada día y podrá dejarte comentarios. Elige qué más puede ver:</div>
       <label class="opt"><input type="checkbox" data-act-change="share-opt" data-k="meals" data-id="${c.id}" ${sh.meals?'checked':''}><span><b>Mostrar mis comidas</b><br><span class="note">Alimentos, cantidades y calorías de cada día</span></span></label>
       <label class="opt"><input type="checkbox" data-act-change="share-opt" data-k="workouts" data-id="${c.id}" ${sh.workouts?'checked':''}><span><b>Mostrar mis rutinas</b><br><span class="note">Entrenos con ejercicios, series y peso</span></span></label>
+      <label class="opt"><input type="checkbox" data-act-change="share-opt" data-k="photos" data-id="${c.id}" ${sh.photos!==false?'checked':''}><span><b>Mostrar mis fotos del reto</b><br><span class="note">Las fotos por enlace que añadas a este reto</span></span></label>
       <div class="acct">${FB.user?`<span class="note">Cuenta: <b>${esc(FB.user.email||'')}</b></span><button class="btn sm ghost" data-act="fb-logout">Cerrar sesión</button>`:`<span class="note">No has iniciado sesión</span><button class="btn sm" data-act="fb-login">Iniciar sesión</button>`}</div>
       ${sh.on?`<div class="linkbox"><input class="in" readonly value="${esc(shareLink(c))}" id="share-url" aria-label="Enlace para compartir"><button class="btn goal" data-act="share-copy" data-id="${c.id}">Copiar</button></div>
       <div class="note" id="share-st">${SHARE_ST.msg||'Se actualiza solo cada vez que registras algo.'}</div>`:''}
@@ -934,6 +982,8 @@ function buildSnapshot(c){
   for(let d=c.start;d<=last;d=addDays(d,1)){
     const chk=dayCheck(c,d),e={ok:dayDone(c,d),m:!!(c.log&&c.log[d]),k:Math.round(chk.kcal),p:Math.round(chk.tot.p),c:Math.round(chk.tot.c),f:Math.round(chk.tot.f),n:chk.n,w:chk.ws.map(w=>w.name)};
     if(c.kind==='goal')e.v=num(c.log?.[d]);
+    if(c.trackWeight){const kg=weightOn(d);if(kg)e.wt=kg}
+    if(sh.photos!==false){const ph=photosOn(d,c.id);if(ph.length)e.ph=ph.map(p=>({u:p.url,n:p.note||''}))}
     if(sh.meals)e.ml=S.meals.filter(m=>m.date===d).map(m=>({t:m.type,n:m.name,po:m.portion||'',k:Math.round(m.kcal)}));
     if(sh.workouts)e.wx=chk.ws.map(w=>({n:w.name,du:num(w.duration),vol:workoutVolume(w),ex:(w.exercises||[]).map(x=>({n:x.name,s:x.sets.filter(s=>num(s.reps)>0).length,r:Math.max(0,...x.sets.map(s=>num(s.reps))),kg:Math.max(0,...x.sets.map(s=>num(s.weight)))}))}));
     if(!e.ok&&d<t)e.why=chk.msgs.join(' · ')||(c.kind==='habit'?'No marcado':'');
@@ -941,7 +991,7 @@ function buildSnapshot(c){
   }
   const[lo,hi,g,tl]=kcalRange(c);
   return{owner:S.settings.name||'',show:{meals:!!sh.meals,workouts:!!sh.workouts},
-    ch:{name:c.name,desc:c.desc||'',kind:c.kind,start:c.start,days:c.days,target:num(c.target),unit:c.unit,verify:verifyOf(c),tol:tl,kcalGoal:g,lo,hi,color:c.color},days,asOf:t};
+    ch:{name:c.name,desc:c.desc||'',kind:c.kind,start:c.start,days:c.days,target:num(c.target),unit:c.unit,verify:verifyOf(c),tol:tl,kcalGoal:g,lo,hi,color:c.color,trackWeight:!!c.trackWeight},days,asOf:t};
 }
 async function publishShares(){
   try{await fbInit(fbCfg(),false);
@@ -1041,7 +1091,8 @@ function viewerRender(){
   const vt=d=>V.tasks.filter(x=>x.day===d);const star=d=>vt(d).length?`<span class="rstar">${STAR}</span>`:'';
   const info=d=>{if(d>t||!days[d])return{st:'fut',ic:star(d)};const x=days[d];
     if(c.kind==='goal'){const full=num(x.v)>=c.target/c.days;return{st:x.v?(full?'ok':'part'):d===t?'pend':'miss',sub:x.v?fmt(x.v,1):'',ic:star(d)}}
-    return{st:x.ok?'ok':d===t?'pend':'miss',ic:(x.w&&x.w.length?DUMB:'')+star(d),sub:(c.verify==='kcal'||c.verify==='both')&&x.n?fmt(x.k):''}};
+    return{st:x.ok?'ok':d===t?'pend':'miss',ic:(x.w&&x.w.length?DUMB:'')+(x.ph&&x.ph.length?`<span class="rcam">${CAM}</span>`:'')+star(d),sub:[(c.verify==='kcal'||c.verify==='both')&&x.n?fmt(x.k):'',x.wt?fmt(x.wt,1)+'kg':''].filter(Boolean).join(' · ')}};
+  const wts=keys.filter(d=>days[d].wt).sort();const w0=wts.length?days[wts[0]].wt:null,w1=wts.length?days[wts[wts.length-1]].wt:null;
   const rule=c.kind!=='habit'?`Meta: sumar ${fmt(c.target,1)} ${esc(c.unit)} en ${c.days} días.`:c.verify==='manual'?'Se marca manualmente cada día.':c.verify==='workout'?'Cada día cuenta solo si hay un entreno registrado.':c.verify==='kcal'?`Cada día cuenta solo con calorías entre <b>${fmt(c.lo)}</b> y <b>${fmt(c.hi)}</b> kcal.`:`Cada día cuenta solo con un entreno registrado y calorías entre <b>${fmt(c.lo)}</b> y <b>${fmt(c.hi)}</b> kcal.`;
   const x=days[V.sel];
   let dayHtml='';
@@ -1064,12 +1115,14 @@ function viewerRender(){
       ${c.verify==='kcal'||c.verify==='both'?`<div class="chk-row ${x.n&&x.k>=c.lo&&x.k<=c.hi?'ok':''}"><span class="cdot">${x.n&&x.k>=c.lo&&x.k<=c.hi?'✓':'✕'}</span><div style="flex:1;min-width:0"><b>Calorías</b><div class="note num">${fmt(x.k)} kcal · P ${fmt(x.p)} · C ${fmt(x.c)} · G ${fmt(x.f)}</div>${kcalGauge(x.k,c.lo,c.hi)}</div></div>`:x.n?`<div class="note num">${fmt(x.k)} kcal · P ${fmt(x.p)} · C ${fmt(x.c)} · G ${fmt(x.f)}</div>`:''}
       ${c.verify==='workout'||c.verify==='both'?`<div class="chk-row ${x.w&&x.w.length?'ok':''}" style="margin-top:8px"><span class="cdot">${x.w&&x.w.length?'✓':'✕'}</span><div><b>Entreno</b><div class="note">${x.w&&x.w.length?x.w.map(esc).join(', '):'Sin entreno registrado'}</div></div></div>`:''}
       ${meals||wx?`<div class="grid g2" style="margin-top:14px">${meals?`<div><div class="lbl" style="margin-bottom:6px">Comidas</div>${meals}</div>`:''}${wx?`<div><div class="lbl" style="margin-bottom:6px">Entrenos</div>${wx}</div>`:''}</div>`:''}
+      ${x.wt?`<div class="chk-row ok" style="margin-top:8px"><span class="cdot">✓</span><div><b>Peso del día</b><div class="note num">${fmt(x.wt,1)} kg</div></div></div>`:''}
+      ${x.ph&&x.ph.length?`<div class="lbl" style="margin:14px 0 8px">Fotos del día</div><div class="phgrid">${x.ph.map(p=>`<div>${imgLink(p.u,p.n)}${p.n?`<div class="note">${esc(p.n)}</div>`:''}</div>`).join('')}</div>`:''}
       <div style="margin-top:12px"><button class="btn sm" data-act="v-comment" data-d="${V.sel}">Comentar este día</button></div>`;
   }
   dayHtml+=taskBox;
   const upd=D.updatedAt?new Date(D.updatedAt).toLocaleString('es-ES',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'';
   const kept={};['tk-title','tk-note','tk-name'].forEach(id=>{const e=$('#'+id);if(e)kept[id]=e.value});const focusId=document.activeElement&&document.activeElement.id;
-  $('#v-main').innerHTML=`<section class="vhero" style="--c:${c.color}"><div class="eyebrow">Reto de ${esc(D.owner||'')}</div><h1 class="title">${esc(c.name)}</h1>${c.desc?`<p class="note" style="margin:6px 0 0">${esc(c.desc)}</p>`:''}<div class="vrule">${rule}</div></section>
+  $('#v-main').innerHTML=`<section class="vhero" style="--c:${c.color}"><div class="eyebrow">Reto de ${esc(D.owner||'')}</div><h1 class="title">${esc(c.name)}</h1>${c.desc?`<p class="note" style="margin:6px 0 0">${esc(c.desc)}</p>`:''}<div class="vrule">${rule}</div>${c.trackWeight&&w0?`<div class="vw"><span>Peso al inicio: <b>${fmt(w0,1)} kg</b></span><span>Ahora: <b>${fmt(w1,1)} kg</b></span><span class="${w1-w0<=0?'up':'down'}"><b>${w1-w0>0?'+':''}${fmt(w1-w0,1)} kg</b></span></div>`:''}</section>
     <div class="grid g4" style="margin-top:16px">
       <div class="card kpi"><div class="ring-wrap">${ring(pct,92,10,c.color)}<span class="num">${Math.round(pct*100)}%</span></div><div><div class="k-label">Progreso</div><div class="k-val num">${fmt(total,1)}<small>/ ${fmt(target,1)}</small></div><div class="k-sub">${esc(c.unit)}</div></div></div>
       <div class="card kpi"><div><div class="k-label">Cumplimiento</div><div class="k-val num">${rate}<small>%</small></div><div class="k-sub">${done} de ${elapsed} días</div></div></div>
@@ -1299,7 +1352,7 @@ function vProgreso(){
   const avgK=last7.length?last7.reduce((s,t)=>s+t.kcal,0)/last7.length:0;
   const avgP=last7.length?last7.reduce((s,t)=>s+t.p,0)/last7.length:0;
   const totalVol=S.workouts.reduce((s,w)=>s+workoutVolume(w),0);
-  return topbar('Análisis','Progreso',`<button class="btn" data-act="export">Exportar datos</button><button class="btn pri" data-act="add-weight">${plus} Registrar peso</button>`)+
+  return topbar('Análisis','Progreso',`${progTabs('progreso')}<button class="btn" data-act="export">Exportar datos</button><button class="btn pri" data-act="add-weight">${plus} Registrar peso</button>`)+
   `<div class="grid g4">
     <div class="card kpi"><div><div class="k-label">Sesiones totales</div><div class="k-val num">${S.workouts.length}</div><div class="k-sub">${fmt(totalVol/1000,1)} t de volumen acumulado</div></div></div>
     <div class="card kpi"><div><div class="k-label">Media kcal 7 días</div><div class="k-val num">${avgK?fmt(avgK):'—'}</div><div class="k-sub">Objetivo ${fmt(g.kcal)} kcal</div></div></div>
@@ -1538,6 +1591,7 @@ function challengeModal(c,tpl){
       ${(dr.verify==='kcal'||dr.verify==='both')&&dr.useProfile===false?`<div class="frow g2"><div class="field"><label for="c-kg">Objetivo de calorías</label><input class="in num" id="c-kg" data-f="kcalGoal" value="${dr.kcalGoal}" inputmode="numeric"></div><div class="field"><span class="lbl">Margen permitido</span><div class="toggle">${[5,10,15,20].map(n=>`<button type="button" class="${num(dr.tol)===n?'on':''}" data-m="tol" data-v="${n}">±${n}%</button>`).join('')}</div></div></div>
         <div class="note" id="c-range">Rango válido: ${fmt(num(dr.kcalGoal)*(1-num(dr.tol)/100))} – ${fmt(num(dr.kcalGoal)*(1+num(dr.tol)/100))} kcal</div>`:''}`:''}
       <div class="field"><span class="lbl">Duración rápida</span><div class="toggle">${[7,14,21,30,60,90].map(n=>`<button type="button" class="${+dr.days===n?'on':''}" data-m="days" data-v="${n}">${n} días</button>`).join('')}</div></div>
+      <div class="field"><span class="lbl">Peso (opcional)</span><label class="opt"><input type="checkbox" data-m="tw" ${dr.trackWeight?'checked':''}><span><b>Seguir mi peso en este reto</b><br><span class="note">Podrás anotar tu peso en el calendario del reto y ver cómo cambia. Quien revise el reto también lo verá.</span></span></label></div>
       <div class="field"><span class="lbl">Color</span><div class="swatches">${COLORS.map(x=>`<button type="button" class="${x===dr.color?'on':''}" style="background:${x}" data-m="color" data-v="${x}" aria-label="Color"></button>`).join('')}</div></div>`,
     foot:()=>`<button class="btn" data-m="close">Cancelar</button><button class="btn goal" data-m="save">${c?'Guardar cambios':'Crear reto'}</button>`,
     input:e=>{const el=e.target;if(el.dataset.f)dr[el.dataset.f]=el.value;if(el.dataset.f==='kcalGoal'){const r=$('#c-range');if(r)r.textContent=`Rango válido: ${fmt(num(dr.kcalGoal)*(1-num(dr.tol)/100))} – ${fmt(num(dr.kcalGoal)*(1+num(dr.tol)/100))} kcal`}},
@@ -1545,6 +1599,7 @@ function challengeModal(c,tpl){
       if(a==='verify'){dr.verify=el.dataset.v;drawModal()}
       if(a==='tol'){dr.tol=+el.dataset.v;drawModal()}
       if(a==='useprof'){dr.useProfile=el.dataset.v==='1';drawModal()}
+      if(a==='tw'){dr.trackWeight=el.checked}
       if(a==='kind'){dr.kind=el.dataset.v;if(dr.kind==='habit')dr.unit='días';else if(dr.unit==='días')dr.unit='km';drawModal()}
       if(a==='days'){dr.days=+el.dataset.v;drawModal()}
       if(a==='color'){dr.color=el.dataset.v;drawModal()}
@@ -1631,6 +1686,11 @@ const A={
   'fb-login':()=>withAuth(()=>{render();schedulePublish()}),
   'fb-logout':async()=>{try{if(SYNC.timer&&SYNC.ready){clearTimeout(SYNC.timer);await pushSync()}await FB.auth.signOut();FB.user=null;FB.uid=null;stopSync();if(gateActive()){CURUID=null;S=defaults()}if(gateActive()){GATE.mode='login';GATE.msg='Sesión cerrada.';GATE.ok=true;renderGate()}else{render();toast('Sesión cerrada')}}catch(e){toast('No se pudo cerrar sesión')}},
   'task-set':el=>setTask(el.dataset.sid,el.dataset.id,el.dataset.v),
+  'task-reply':el=>{const x=TASKS.list.find(t=>t.id===el.dataset.id&&t.shareId===el.dataset.sid);x&&taskReplyModal(x)},
+  'photo-add':el=>photoModal({date:el.dataset.d||today(),chId:el.dataset.ch||''}),
+  'photo-open':el=>photoView(el.dataset.id),
+  'day-open':el=>dayModal(el.dataset.d,el.dataset.id),
+  'ch-weight':el=>{const v=num(($('#dw-kg')||{}).value);if(!(v>=20&&v<=400)){toast('Escribe un peso válido en kg');return}putWeight(el.dataset.d,v);touch('body');render();toast('Peso guardado')},
   'task-del':el=>{const sid=el.dataset.sid,id=el.dataset.id;confirmBox('¿Eliminar este reto asignado?',()=>withAuth(async()=>{try{await FB.db.collection('shares').doc(sid).collection('tasks').doc(id).delete()}catch(e){toast('No se pudo eliminar')}}))},
   'v-task':async el=>{const title=$('#tk-title').value.trim(),note=$('#tk-note').value.trim(),name=($('#tk-name').value||'').trim();
     if(!name||!title){$('#tk-st').textContent='Escribe tu nombre y el reto.';return}
@@ -1728,17 +1788,125 @@ function taskChip(st){return st==='done'?'<span class="chip done">✓ Cumplido</
 function taskRow(x,owner,showDate){
   const st=x.status||'pending',t=today();
   const head=`<span class="tk-ic">${STAR}</span><div class="grow"><div class="t">${esc(x.title)}</div><div class="s">De ${esc(x.name||'Anónimo')}${showDate?` · ${shortDate(x.day)}`:''}${x.note?` · ${esc(x.note)}`:''}</div></div>`;
-  if(!owner)return `<div class="task st-${st}">${head}${taskChip(st)}</div>`;
+  if(!owner)return `<div class="task st-${st}">${head}${taskChip(st)}${taskReplyHtml(x)}</div>`;
   const del=`<button class="icon-btn" data-act="task-del" data-sid="${x.shareId}" data-id="${x.id}" aria-label="Eliminar reto asignado" title="Eliminar">×</button>`;
   let act='';
   if(x.day<=t)act=st==='pending'?`<button class="btn sm goal" data-act="task-set" data-sid="${x.shareId}" data-id="${x.id}" data-v="done">✓ Lo cumplí</button><button class="btn sm" data-act="task-set" data-sid="${x.shareId}" data-id="${x.id}" data-v="missed">No lo cumplí</button>`:`${taskChip(st)}<button class="btn sm ghost" data-act="task-set" data-sid="${x.shareId}" data-id="${x.id}" data-v="pending">Deshacer</button>`;
   else act='<span class="chip">Próximo</span>';
-  return `<div class="task st-${st}">${head}${del}<div class="tk-act">${act}</div></div>`;
+  if(x.day<=t)act+=`<button class="btn sm ghost" data-act="task-reply" data-sid="${x.shareId}" data-id="${x.id}">${x.reply||x.replyPhoto?'Editar respuesta':'💬 Responder'}</button>`;
+  return `<div class="task st-${st}">${head}${del}<div class="tk-act">${act}</div>${taskReplyHtml(x)}</div>`;
 }
 async function setTask(sid,id,status){
   await withAuth(async()=>{try{await FB.db.collection('shares').doc(sid).collection('tasks').doc(id).update({status,doneAt:Date.now()});toast(status==='done'?'¡Reto cumplido! ⭐':status==='missed'?'Marcado como no cumplido':'Reto pendiente de nuevo')}
     catch(e){toast(e.code==='permission-denied'?'Sin permiso: actualiza las reglas de Firestore (Perfil → Copiar reglas)':'No se pudo actualizar')}});
 }
+
+
+/* ---------- peso por día y fotos por enlace ---------- */
+const weightOn=d=>{const w=S.weights.find(x=>x.date===d);return w?w.kg:null};
+function putWeight(d,kg){S.weights=S.weights.filter(w=>w.date!==d);if(kg>=20&&kg<=400)S.weights.push({date:d,kg:+(+kg).toFixed(1)})}
+const isUrl=u=>/^https?:\/\/\S+$/i.test(String(u||'').trim());
+const CAM='<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>';
+function imgLink(url,alt,cls){return `<a class="ph ${cls||''}" href="${esc(url)}" target="_blank" rel="noopener noreferrer"><img src="${esc(url)}" alt="${esc(alt||'Foto de progreso')}" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentElement.classList.add('broken')"><span class="ph-fb">${CAM} Abrir foto ↗</span></a>`}
+const photosOn=(d,chId)=>S.photos.filter(p=>p.date===d&&(!chId||p.chId===chId));
+const URL_HELP='Usa un enlace <b>directo</b> a la imagen (suele terminar en .jpg, .png o .webp). Sirven Imgur, PostImages o ImgBB: sube la foto y copia el «Direct link». Los enlaces de Google Fotos o Drive no muestran la imagen.';
+function photoModal(opts){
+  opts=opts||{};const d0=opts.date||today();
+  const st={url:'',date:d0,note:'',chId:opts.chId||'',kg:weightOn(d0)||''};
+  const prev=()=>isUrl(st.url)?imgLink(st.url.trim(),'Vista previa','big'):'<span class="note">Pega un enlace para ver la vista previa</span>';
+  openModal({title:'Añadir foto de progreso',
+    body:()=>`<div class="field"><label for="ph-url">Enlace de la imagen</label><input class="in" id="ph-url" data-f="url" value="${esc(st.url)}" placeholder="https://i.imgur.com/abc123.jpg" autocomplete="off" autofocus></div>
+      <div class="ph-prev" id="ph-prev">${prev()}</div>
+      <div class="note">${URL_HELP}</div>
+      <div class="frow g3"><div class="field"><label for="ph-d">Fecha</label><input class="in" type="date" id="ph-d" data-f="date" value="${st.date}"></div>
+        <div class="field"><label for="ph-kg">Peso ese día (opcional)</label><input class="in num" id="ph-kg" data-f="kg" value="${esc(st.kg)}" inputmode="decimal" placeholder="kg"></div>
+        <div class="field"><label for="ph-ch">Reto (opcional)</label><select class="in" id="ph-ch" data-f="chId"><option value="">Ninguno</option>${S.challenges.map(c=>`<option value="${c.id}" ${c.id===st.chId?'selected':''}>${esc(c.name)}</option>`).join('')}</select></div></div>
+      <div class="field"><label for="ph-n">Nota (opcional)</label><input class="in" id="ph-n" data-f="note" value="${esc(st.note)}" maxlength="200" placeholder="Ej. Semana 2, en ayunas"></div>`,
+    foot:()=>`<button class="btn" data-m="close">Cancelar</button><button class="btn pri" data-m="save">Guardar foto</button>`,
+    input:e=>{const f=e.target.dataset.f;if(!f)return;st[f]=e.target.value;if(f==='url'){const p=$('#ph-prev');if(p)p.innerHTML=prev()}},
+    act:a=>{if(a!=='save')return;const url=st.url.trim();if(!isUrl(url)){toast('Pega un enlace que empiece por https://');return}
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(st.date))st.date=today();
+      S.photos.push({id:nid(),date:st.date,url,note:st.note.trim().slice(0,200),chId:st.chId||''});
+      const kg=num(st.kg);if(kg)putWeight(st.date,kg);
+      touch('photos','body');closeModal();render();toast('Foto guardada ✓')}});
+}
+function photoView(id){
+  const p=S.photos.find(x=>x.id===id);if(!p)return;const c=S.challenges.find(x=>x.id===p.chId);const kg=weightOn(p.date);
+  openModal({title:longDate(p.date),body:()=>`<div class="ph-view">${imgLink(p.url,p.note,'big')}</div>
+    <div class="note">${kg?`<b>${fmt(kg,1)} kg</b> · `:''}${c?`Reto: <b>${esc(c.name)}</b> · `:''}${p.note?esc(p.note):''}</div>`,
+    foot:()=>`<button class="btn danger" data-m="del" style="margin-right:auto">Eliminar</button><button class="btn" data-m="close">Cerrar</button>`,
+    act:a=>{if(a==='del'){S.photos=S.photos.filter(x=>x.id!==id);touch('photos');closeModal();render();toast('Foto eliminada')}}});
+}
+function thumb(p){const kg=weightOn(p.date);return `<button class="phc" data-act="photo-open" data-id="${p.id}"><span class="phc-img"><img src="${esc(p.url)}" alt="${esc(p.note||'Foto de progreso')}" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentElement.classList.add('broken')"><span class="ph-fb">${CAM} Sin vista previa</span></span><span class="phc-t"><b>${shortDate(p.date)}</b>${kg?` · ${fmt(kg,1)} kg`:''}</span>${p.note?`<span class="phc-n">${esc(p.note)}</span>`:''}</button>`}
+const progTabs=r=>`<div class="seg" role="tablist"><a href="#progreso" class="${r==='progreso'?'on':''}">Estadísticas</a><a href="#fotos" class="${r==='fotos'?'on':''}">Fotos</a></div>`;
+function vFotos(){
+  const list=[...S.photos].sort((a,b)=>a.date<b.date?1:a.date>b.date?-1:0);
+  const first=list[list.length-1],last=list[0];
+  const kgF=first&&weightOn(first.date),kgL=last&&weightOn(last.date);
+  const cmp=list.length>=2?`<div class="card"><div class="card-h"><h3>Antes y ahora</h3><span class="sub">${diffDays(last.date,first.date)} días de diferencia${kgF&&kgL?` · <b class="${kgL-kgF<=0?'up':'down'}">${kgL-kgF>0?'+':''}${fmt(kgL-kgF,1)} kg</b>`:''}</span></div>
+    <div class="cmp"><div><div class="lbl">${shortDate(first.date)}${kgF?` · ${fmt(kgF,1)} kg`:''}</div>${imgLink(first.url,'Primera foto','big')}</div><div><div class="lbl">${shortDate(last.date)}${kgL?` · ${fmt(kgL,1)} kg`:''}</div>${imgLink(last.url,'Última foto','big')}</div></div></div>`:'';
+  const byMonth={};list.forEach(p=>{const m=p.date.slice(0,7);(byMonth[m]=byMonth[m]||[]).push(p)});
+  const gal=list.length?Object.keys(byMonth).map(m=>{const[y,mm]=m.split('-').map(Number);return `<div class="card"><div class="card-h"><h3>${MONTHS[mm-1]} ${y}</h3><span class="sub">${byMonth[m].length} fotos</span></div><div class="phgrid">${byMonth[m].map(thumb).join('')}</div></div>`}).join('')
+    :`<div class="empty">Aún no tienes fotos de progreso.<div class="note" style="margin-top:8px;max-width:520px;margin-inline:auto">${URL_HELP}</div><div style="margin-top:12px"><button class="btn pri" data-act="photo-add">${plus} Añadir primera foto</button></div></div>`;
+  return topbar('Análisis','Fotos de progreso',`${progTabs('fotos')}<button class="btn pri" data-act="photo-add">${plus} Añadir foto</button>`)+`<div class="stack">${cmp}${gal}</div>`;
+}
+/* día completo */
+function dayModal(d,chId){
+  const c=chId?S.challenges.find(x=>x.id===chId):null;const tot=dayTotals(d),ws=workoutsOn(d),kg=weightOn(d),ph=S.photos.filter(p=>p.date===d);
+  const tks=tasksOn(d);
+  let st='';
+  if(c){if(c.kind==='goal'){const v=num(c.log?.[d]);st=v?`<span class="chip done">${fmt(v,1)} ${esc(c.unit)}</span>`:'<span class="chip">Sin registro</span>'}else{const chk=dayCheck(c,d);st=d>today()?'<span class="chip">Próximo</span>':dayDone(c,d)?'<span class="chip done">✓ Cumplido</span>':d===today()?'<span class="chip">Pendiente</span>':`<span class="chip acc">No cumplido</span>${chk.msgs.length?`<span class="note">${chk.msgs.map(esc).join(' · ')}</span>`:''}`}}
+  const meals=MEALS.map(([k,l])=>{const it=S.meals.filter(m=>m.date===d&&m.type===k);return it.length?`<div class="vm"><div class="lbl">${l} · ${fmt(it.reduce((s,m)=>s+m.kcal,0))} kcal</div>${it.map(m=>`<div class="vm-i"><span>${esc(m.name)} <span class="note">${esc(m.portion||'')}</span></span><b class="num">${fmt(m.kcal)}</b></div>`).join('')}</div>`:''}).join('');
+  const wx=ws.map(w=>`<div class="vm"><div class="lbl">${esc(w.name)} · ${w.duration||0} min · ${fmt(workoutVolume(w))} kg</div>${(w.exercises||[]).map(e=>{const done=e.sets.filter(s=>num(s.reps)>0);return `<div class="vm-i"><span>${esc(e.name)}</span><span class="note num">${done.map(s=>`${fmt(s.reps)}×${fmt(s.weight,1)}`).join(' · ')}</span></div>`}).join('')}${w.notes?`<div class="note">«${esc(w.notes)}»</div>`:''}</div>`).join('');
+  openModal({title:longDate(d),
+    body:()=>`${c?`<div class="day-st"><span class="lbl">${esc(c.name)}</span>${st}</div>`:''}
+      <div class="grid g3 day-kpis">
+        <div class="mini"><span class="lbl">Calorías</span><b class="num">${fmt(tot.kcal)}</b><span class="note num">P ${fmt(tot.p)} · C ${fmt(tot.c)} · G ${fmt(tot.f)}</span></div>
+        <div class="mini"><span class="lbl">Peso</span><b class="num">${kg?fmt(kg,1)+' kg':'—'}</b><span class="note">Agua ${fmt((S.water[d]||0)/1000,2)} L</span></div>
+        <div class="mini"><span class="lbl">Entreno</span><b class="num">${ws.length?fmt(ws.reduce((s,w)=>s+workoutVolume(w),0))+' kg':'—'}</b><span class="note">${ws.length?ws.length+' sesión'+(ws.length>1?'es':''):'Sin entreno'}</span></div>
+      </div>
+      ${tks.length?`<div><div class="lbl" style="margin-bottom:8px">Retos asignados</div><div class="stack">${tks.map(x=>taskRow(x,false)).join('')}</div></div>`:''}
+      <div class="grid g2"><div><div class="lbl" style="margin-bottom:6px">Comidas</div>${meals||'<div class="note">No registraste comidas.</div>'}</div><div><div class="lbl" style="margin-bottom:6px">Entrenos</div>${wx||'<div class="note">No registraste entrenos.</div>'}</div></div>
+      <div><div class="lbl" style="margin-bottom:8px">Fotos</div>${ph.length?`<div class="phgrid">${ph.map(thumb).join('')}</div>`:'<div class="note">Sin fotos este día.</div>'}</div>`,
+    foot:()=>`<button class="btn" data-m="photo">${CAM} Añadir foto</button><button class="btn" data-m="meal">+ Comida</button><button class="btn" data-m="close">Cerrar</button>`,
+    act:a=>{if(a==='photo'){closeModal();photoModal({date:d,chId})}if(a==='meal'){closeModal();mealModal(d)}}});
+}
+/* peso dentro de un reto */
+function weightCard(c){
+  if(!c.trackWeight)return '';
+  const end=addDays(c.start,c.days-1),t=today(),last=t<end?t:end;
+  const pts=sortedWeights().filter(w=>w.date>=c.start&&w.date<=last);
+  const before=sortedWeights().filter(w=>w.date<c.start).pop();
+  const start=pts[0]||before,cur=pts[pts.length-1];
+  const diff=start&&cur?cur.kg-start.kg:null;
+  return `<div class="card"><div class="card-h"><h3>Peso en el reto</h3><span class="sub">${pts.length} registros</span></div>
+    <div class="wrow"><div><span class="lbl">Inicio</span><b class="num">${start?fmt(start.kg,1):'—'}</b></div><div><span class="lbl">Ahora</span><b class="num">${cur?fmt(cur.kg,1):'—'}</b></div><div><span class="lbl">Cambio</span><b class="num ${diff===null?'':diff<=0?'up':'down'}">${diff===null?'—':(diff>0?'+':'')+fmt(diff,1)} kg</b></div></div>
+    ${pts.length>=2?weightChart(pts):'<div class="note">Anota tu peso en los días del reto para ver la tendencia.</div>'}</div>`;
+}
+function challengePhotosCard(c){
+  const ph=S.photos.filter(p=>p.chId===c.id).sort((a,b)=>a.date<b.date?1:-1);
+  return `<div class="card"><div class="card-h"><h3>Fotos del reto</h3><button class="btn sm" data-act="photo-add" data-ch="${c.id}" data-d="${ui.rsel||today()}">${CAM} Añadir</button></div>
+    ${ph.length?`<div class="phgrid">${ph.map(thumb).join('')}</div>`:'<div class="note">Añade fotos por enlace para ver tu cambio a lo largo del reto.</div>'}</div>`;
+}
+/* responder a un reto asignado */
+function taskReplyModal(x){
+  const st={reply:x.reply||'',photo:x.replyPhoto||'',status:(x.status&&x.status!=='pending')?x.status:'done'};
+  const prev=()=>isUrl(st.photo)?imgLink(st.photo.trim(),'Foto de respuesta','big'):'';
+  openModal({title:'Responder al reto',
+    body:()=>`<div class="task st-pending">${`<span class="tk-ic">${STAR}</span><div class="grow"><div class="t">${esc(x.title)}</div><div class="s">De ${esc(x.name||'Anónimo')} · ${shortDate(x.day)}${x.note?' · '+esc(x.note):''}</div></div>`}</div>
+      <div class="field"><span class="lbl">¿Lo cumpliste?</span><div class="toggle"><button type="button" class="${st.status==='done'?'on':''}" data-m="st" data-v="done">✓ Sí, lo cumplí</button><button type="button" class="${st.status==='missed'?'on':''}" data-m="st" data-v="missed">No lo cumplí</button></div></div>
+      <div class="field"><label for="rp-t">Tu respuesta</label><textarea class="in" id="rp-t" data-f="reply" rows="3" maxlength="500" placeholder="Ej. Hecho, ni un dulce en todo el día">${esc(st.reply)}</textarea></div>
+      <div class="field"><label for="rp-p">Foto por enlace (opcional)</label><input class="in" id="rp-p" data-f="photo" value="${esc(st.photo)}" placeholder="https://i.imgur.com/abc123.jpg" autocomplete="off"></div>
+      <div class="ph-prev" id="rp-prev">${prev()}</div><div class="note">${URL_HELP}</div>`,
+    foot:()=>`<button class="btn" data-m="close">Cancelar</button><button class="btn goal" data-m="send">Enviar respuesta</button>`,
+    input:e=>{const f=e.target.dataset.f;if(!f)return;st[f]=e.target.value;if(f==='photo'){const p=$('#rp-prev');if(p)p.innerHTML=prev()}},
+    act:(a,el)=>{if(a==='st'){st.status=el.dataset.v;document.querySelectorAll('#modal [data-m="st"]').forEach(b=>b.classList.toggle('on',b.dataset.v===st.status))}
+      if(a==='send'){const ph=st.photo.trim();if(ph&&!isUrl(ph)){toast('El enlace de la foto debe empezar por https://');return}
+        if(!st.reply.trim()&&!ph){toast('Escribe una frase o añade una foto');return}
+        withAuth(async()=>{try{await FB.db.collection('shares').doc(x.shareId).collection('tasks').doc(x.id).update({status:st.status,doneAt:Date.now(),reply:st.reply.trim().slice(0,500),replyPhoto:ph,replyAt:Date.now()});closeModal();toast('Respuesta enviada ✓')}
+          catch(e){toast(e.code==='permission-denied'?'Sin permiso: actualiza las reglas de Firestore':'No se pudo enviar la respuesta')}})}}});
+}
+const taskReplyHtml=x=>x.reply||x.replyPhoto?`<div class="tk-reply"><div class="lbl">Respuesta</div>${x.reply?`<div>«${esc(x.reply)}»</div>`:''}${x.replyPhoto?imgLink(x.replyPhoto,'Foto de respuesta','sm'):''}</div>`:'';
 
 /* ---------- perfil y copias de seguridad ---------- */
 const CLOUD={ready:false,checked:false,at:null,size:0,busy:false,timer:null,msg:''};
@@ -1758,7 +1926,7 @@ function applyBackup(n){
   if(!S.settings.fb&&fb)S.settings.fb=fb;if(auto!==undefined&&S.settings.cloudAuto===undefined)S.settings.cloudAuto=auto;
   allKeys().forEach(k=>dirty.add(k));touch();render();
 }
-const backupSummary=d=>`${d.workouts.length} entrenos · ${d.meals.length} alimentos registrados · ${d.challenges.length} retos · ${d.routines.length} rutinas · ${d.weights.length} pesos`;
+const backupSummary=d=>`${d.workouts.length} entrenos · ${d.meals.length} alimentos registrados · ${d.challenges.length} retos · ${d.routines.length} rutinas · ${d.weights.length} pesos · ${(d.photos||[]).length} fotos`;
 function confirmRestore(n,origin){
   openModal({title:'Restaurar copia',body:()=>`<p style="margin:0">Vas a reemplazar <b>todos</b> los datos actuales por la copia ${origin}:</p><div class="okbox">${backupSummary(n)}</div><p class="note" style="margin:0">Los datos que tienes ahora se perderán. Si no estás seguro, descarga primero una copia de lo actual.</p>`,
     foot:()=>`<button class="btn" data-m="close">Cancelar</button><button class="btn pri" data-m="yes">Restaurar</button>`,
@@ -1957,12 +2125,12 @@ function renderAcct(){
 }
 
 /* ---------- render ---------- */
-const VIEWS={panel:vPanel,calendario:vCalendario,rutinas:vRutinas,comidas:vComidas,retos:vRetos,progreso:vProgreso,perfil:vPerfil};
+const VIEWS={panel:vPanel,calendario:vCalendario,rutinas:vRutinas,comidas:vComidas,retos:vRetos,progreso:vProgreso,fotos:vFotos,perfil:vPerfil};
 function route(){const h=location.hash.slice(1);if(h.startsWith('reto-'))return 'reto';return VIEWS[h]?h:'panel'}
 function render(){
   const r=route();
-  const nr=r==='reto'?'retos':r;const links=ROUTES.map(([k,l])=>`<a href="#${k}" class="${k===nr?'on':''}" title="${l}" ${k===nr?'aria-current="page"':''}>${ico(k)}<span>${l}</span></a>`).join('');renderAcct();
-  $('#nav').innerHTML=links;$('#tabbar').innerHTML=links;
+  const nr=r==='reto'?'retos':r;const lk=(k,l,on,sub)=>`<a href="#${k}" class="${on?'on':''} ${sub?'subnav':''}" title="${l}" ${on?'aria-current="page"':''}>${ico(k)}<span>${l}</span></a>`;renderAcct();
+  $('#nav').innerHTML=ROUTES.map(([k,l])=>lk(k,l,k===nr,k==='fotos')).join('');$('#tabbar').innerHTML=ROUTES.filter(([k])=>k!=='fotos').map(([k,l])=>lk(k,l,k===nr||(k==='progreso'&&nr==='fotos'))).join('');
   const y=window.scrollY;
   $('#main').innerHTML=r==='reto'?vReto(location.hash.slice(6)):VIEWS[r]();ensureTaskSubs();
   window.scrollTo(0,y);
