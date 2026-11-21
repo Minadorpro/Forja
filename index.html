@@ -398,6 +398,7 @@ body.side-mini .subnav{padding-left:0!important}
 .ph.broken,.phc-img.broken{min-height:120px}
 .ph.broken .ph-fb,.phc-img.broken .ph-fb{display:flex}
 .m-body>*{flex-shrink:0}
+.field[hidden]{display:none}
 .ph-prev .ph.big,.ph-prev .ph.big img{max-height:300px}
 .ph-view .ph.big,.ph-view .ph.big img{max-height:65vh}
 .ph-prev{min-height:60px;display:grid;place-items:center;border:1px dashed var(--line);border-radius:12px;padding:8px}
@@ -816,7 +817,7 @@ function vReto(id){
     </div>
   </div>`;
 }
-function ownerDayPanel(c,d){
+function ownerDayPanel(c,d,inModal){
   const t=today(),end=addDays(c.start,c.days-1);
   if(d<c.start||d>end)return '';
   const chk=dayCheck(c,d),done=dayDone(c,d),marked=!!c.log?.[d],v=verifyOf(c),fut=d>t;
@@ -830,13 +831,14 @@ function ownerDayPanel(c,d){
   if(chk.needW)checks.push(`<div class="chk-row ${chk.ws.length?'ok':''}"><span class="cdot">${chk.ws.length?'✓':'✕'}</span><div><b>Entreno</b><div class="note">${chk.ws.length?chk.ws.map(w=>`${esc(w.name)} · ${w.duration||0} min · ${fmt(workoutVolume(w))} kg`).join('<br>'):'Ningún entreno registrado'}</div></div>${!chk.ws.length&&!fut?`<button class="btn sm" data-act="pick-workout" data-d="${d}">Registrar</button>`:''}</div>`);
   if(chk.needK)checks.push(`<div class="chk-row ${chk.n&&chk.kcal>=chk.lo&&chk.kcal<=chk.hi?'ok':''}"><span class="cdot">${chk.n&&chk.kcal>=chk.lo&&chk.kcal<=chk.hi?'✓':'✕'}</span><div style="flex:1;min-width:0"><b>Calorías</b><div class="note num">${fmt(chk.kcal)} kcal · P ${fmt(chk.tot.p)} · C ${fmt(chk.tot.c)} · G ${fmt(chk.tot.f)}</div>${kcalGauge(chk.kcal,chk.lo,chk.hi)}</div>${!fut?`<button class="btn sm" data-act="add-meal" data-d="${d}">+ Comida</button>`:''}</div>`);
   const tks=c.share&&c.share.on?tasksOn(d,c.share.id):[];
-  return `<div class="card"><div class="card-h"><div><div class="eyebrow">${d===t?'Hoy':fut?'Próximo':'Día del reto'}</div><h3>${longDate(d)}</h3></div>${status}</div>
+  const head=inModal?`<div class="day-st"><span class="lbl">${esc(c.name)}</span>${status}</div>`:`<div class="card-h"><div><div class="eyebrow">${d===t?'Hoy':fut?'Próximo':'Día del reto'}</div><h3>${longDate(d)}</h3></div>${status}</div>`;
+  return `<div class="${inModal?'day-act':'card'}">${head}
     ${tks.length?`<div class="lbl" style="margin-bottom:8px">Retos asignados</div><div class="stack" style="margin-bottom:12px">${tks.map(x=>taskRow(x,true)).join('')}</div>`:''}
     ${checks.length?`<div class="stack">${checks.join('')}</div>`:''}
     ${!fut&&!chk.ok&&chk.msgs.length&&c.kind==='habit'&&v!=='manual'?`<div class="warnbox">${chk.msgs.map(esc).join(' · ')}</div>`:''}
-    ${c.trackWeight&&!fut?`<div class="chk-row ${weightOn(d)?'ok':''}" style="margin-top:10px"><span class="cdot">${weightOn(d)?'✓':'–'}</span><div style="flex:1"><b>Peso del día</b><div class="wline"><input class="in sm num" id="dw-kg" value="${weightOn(d)?fmt(weightOn(d),1).replace(',','.'):''}" inputmode="decimal" placeholder="kg" aria-label="Peso del día en kg"><button class="btn sm" data-act="ch-weight" data-d="${d}">Guardar</button></div></div></div>`:''}
-    ${(()=>{const ph=photosOn(d,c.id);return ph.length?`<div class="lbl" style="margin:14px 0 8px">Fotos del día</div><div class="phgrid">${ph.map(thumb).join('')}</div>`:''})()}
-    <div class="actions" style="margin-top:12px">${btn}<button class="btn" data-act="day-open" data-d="${d}" data-id="${c.id}">Abrir día completo</button>${fut?'':`<button class="btn ghost" data-act="photo-add" data-ch="${c.id}" data-d="${d}">${CAM} Foto</button>`}</div></div>`;
+    ${c.trackWeight&&!fut?`<div class="chk-row ${weightOn(d)?'ok':''}" style="margin-top:10px"><span class="cdot">${weightOn(d)?'✓':'–'}</span><div style="flex:1"><b>Peso del día</b><div class="wline"><input class="in sm num" value="${weightOn(d)?fmt(weightOn(d),1).replace(',','.'):''}" inputmode="decimal" placeholder="kg" aria-label="Peso del día en kg"><button class="btn sm" data-act="ch-weight" data-d="${d}">Guardar</button></div></div></div>`:''}
+    ${inModal?'':(()=>{const ph=photosOn(d,c.id);return ph.length?`<div class="lbl" style="margin:14px 0 8px">Fotos del día</div><div class="phgrid">${ph.map(thumb).join('')}</div>`:''})()}
+    <div class="actions" style="margin-top:12px">${btn}${inModal?'':`<button class="btn" data-act="day-open" data-d="${d}" data-id="${c.id}">Abrir día completo</button>`}${fut||inModal?'':`<button class="btn ghost" data-act="photo-add" data-ch="${c.id}" data-d="${d}">${CAM} Foto</button>`}</div></div>`;
 }
 
 /* ---------- Firebase (solo en la versión de GitHub) ---------- */
@@ -1679,7 +1681,7 @@ const A={
     c.log[d]=1;touch('challenges');render();toast('¡Día cumplido! 🔥')},
   'ch-add':el=>challengeAddModal(S.challenges.find(x=>x.id===el.dataset.id),el.dataset.d),
   'rcal-move':el=>{const c=S.challenges.find(x=>x.id===ui.rid);if(!c)return;const ms=chMonths(c.start,addDays(c.start,c.days-1));const i=ms.indexOf(ui.rmon)+ +el.dataset.v;if(ms[i]){ui.rmon=ms[i];render()}},
-  'rcal-sel':el=>{ui.rsel=el.dataset.d;render()},
+  'rcal-sel':el=>{ui.rsel=el.dataset.d;render();dayModal(el.dataset.d,ui.rid)},
   'share-open':el=>shareOpen(S.challenges.find(x=>x.id===el.dataset.id)),
   'share-copy':async el=>{const c=S.challenges.find(x=>x.id===el.dataset.id);try{await navigator.clipboard.writeText(shareLink(c));toast('Enlace copiado')}catch(e){$('#share-url').select();toast('Selecciona y copia con Ctrl+C')}},
   'fb-setup':el=>fbSetupModal(()=>render()),
@@ -1690,7 +1692,7 @@ const A={
   'photo-add':el=>photoModal({date:el.dataset.d||today(),chId:el.dataset.ch||''}),
   'photo-open':el=>photoView(el.dataset.id),
   'day-open':el=>dayModal(el.dataset.d,el.dataset.id),
-  'ch-weight':el=>{const v=num(($('#dw-kg')||{}).value);if(!(v>=20&&v<=400)){toast('Escribe un peso válido en kg');return}putWeight(el.dataset.d,v);touch('body');render();toast('Peso guardado')},
+  'ch-weight':el=>{const v=num((el.closest('.chk-row').querySelector('input')||{}).value);if(!(v>=20&&v<=400)){toast('Escribe un peso válido en kg');return}putWeight(el.dataset.d,v);touch('body');render();toast('Peso guardado')},
   'task-del':el=>{const sid=el.dataset.sid,id=el.dataset.id;confirmBox('¿Eliminar este reto asignado?',()=>withAuth(async()=>{try{await FB.db.collection('shares').doc(sid).collection('tasks').doc(id).delete()}catch(e){toast('No se pudo eliminar')}}))},
   'v-task':async el=>{const title=$('#tk-title').value.trim(),note=$('#tk-note').value.trim(),name=($('#tk-name').value||'').trim();
     if(!name||!title){$('#tk-st').textContent='Escribe tu nombre y el reto.';return}
@@ -1793,7 +1795,7 @@ function taskRow(x,owner,showDate){
   let act='';
   if(x.day<=t)act=st==='pending'?`<button class="btn sm goal" data-act="task-set" data-sid="${x.shareId}" data-id="${x.id}" data-v="done">✓ Lo cumplí</button><button class="btn sm" data-act="task-set" data-sid="${x.shareId}" data-id="${x.id}" data-v="missed">No lo cumplí</button>`:`${taskChip(st)}<button class="btn sm ghost" data-act="task-set" data-sid="${x.shareId}" data-id="${x.id}" data-v="pending">Deshacer</button>`;
   else act='<span class="chip">Próximo</span>';
-  if(x.day<=t)act+=`<button class="btn sm ghost" data-act="task-reply" data-sid="${x.shareId}" data-id="${x.id}">${x.reply||x.replyPhoto?'Editar respuesta':'💬 Responder'}</button>`;
+  act+=`<button class="btn sm ghost" data-act="task-reply" data-sid="${x.shareId}" data-id="${x.id}">${x.reply||x.replyPhoto?'Editar respuesta':'💬 Responder'}</button>`;
   return `<div class="task st-${st}">${head}${del}<div class="tk-act">${act}</div>${taskReplyHtml(x)}</div>`;
 }
 async function setTask(sid,id,status){
@@ -1852,23 +1854,21 @@ function vFotos(){
 }
 /* día completo */
 function dayModal(d,chId){
-  const c=chId?S.challenges.find(x=>x.id===chId):null;const tot=dayTotals(d),ws=workoutsOn(d),kg=weightOn(d),ph=S.photos.filter(p=>p.date===d);
-  const tks=tasksOn(d);
-  let st='';
-  if(c){if(c.kind==='goal'){const v=num(c.log?.[d]);st=v?`<span class="chip done">${fmt(v,1)} ${esc(c.unit)}</span>`:'<span class="chip">Sin registro</span>'}else{const chk=dayCheck(c,d);st=d>today()?'<span class="chip">Próximo</span>':dayDone(c,d)?'<span class="chip done">✓ Cumplido</span>':d===today()?'<span class="chip">Pendiente</span>':`<span class="chip acc">No cumplido</span>${chk.msgs.length?`<span class="note">${chk.msgs.map(esc).join(' · ')}</span>`:''}`}}
-  const meals=MEALS.map(([k,l])=>{const it=S.meals.filter(m=>m.date===d&&m.type===k);return it.length?`<div class="vm"><div class="lbl">${l} · ${fmt(it.reduce((s,m)=>s+m.kcal,0))} kcal</div>${it.map(m=>`<div class="vm-i"><span>${esc(m.name)} <span class="note">${esc(m.portion||'')}</span></span><b class="num">${fmt(m.kcal)}</b></div>`).join('')}</div>`:''}).join('');
-  const wx=ws.map(w=>`<div class="vm"><div class="lbl">${esc(w.name)} · ${w.duration||0} min · ${fmt(workoutVolume(w))} kg</div>${(w.exercises||[]).map(e=>{const done=e.sets.filter(s=>num(s.reps)>0);return `<div class="vm-i"><span>${esc(e.name)}</span><span class="note num">${done.map(s=>`${fmt(s.reps)}×${fmt(s.weight,1)}`).join(' · ')}</span></div>`}).join('')}${w.notes?`<div class="note">«${esc(w.notes)}»</div>`:''}</div>`).join('');
-  openModal({title:longDate(d),
-    body:()=>`${c?`<div class="day-st"><span class="lbl">${esc(c.name)}</span>${st}</div>`:''}
+  openModal({title:longDate(d),redraw:true,
+    body:()=>{
+      const c=chId?S.challenges.find(x=>x.id===chId):null;const tot=dayTotals(d),ws=workoutsOn(d),kg=weightOn(d),ph=S.photos.filter(p=>p.date===d);
+      const tks=tasksOn(d);
+      const meals=MEALS.map(([k,l])=>{const it=S.meals.filter(m=>m.date===d&&m.type===k);return it.length?`<div class="vm"><div class="lbl">${l} · ${fmt(it.reduce((s,m)=>s+m.kcal,0))} kcal</div>${it.map(m=>`<div class="vm-i"><span>${esc(m.name)} <span class="note">${esc(m.portion||'')}</span></span><b class="num">${fmt(m.kcal)}</b></div>`).join('')}</div>`:''}).join('');
+      const wx=ws.map(w=>`<div class="vm"><div class="lbl">${esc(w.name)} · ${w.duration||0} min · ${fmt(workoutVolume(w))} kg</div>${(w.exercises||[]).map(e=>{const done=e.sets.filter(s=>num(s.reps)>0);return `<div class="vm-i"><span>${esc(e.name)}</span><span class="note num">${done.map(s=>`${fmt(s.reps)}×${fmt(s.weight,1)}`).join(' · ')}</span></div>`}).join('')}${w.notes?`<div class="note">«${esc(w.notes)}»</div>`:''}</div>`).join('');
+      return `${c?ownerDayPanel(c,d,true):(tks.length?`<div><div class="lbl" style="margin-bottom:8px">Retos asignados</div><div class="stack">${tks.map(x=>taskRow(x,true)).join('')}</div></div>`:'')}
       <div class="grid g3 day-kpis">
         <div class="mini"><span class="lbl">Calorías</span><b class="num">${fmt(tot.kcal)}</b><span class="note num">P ${fmt(tot.p)} · C ${fmt(tot.c)} · G ${fmt(tot.f)}</span></div>
         <div class="mini"><span class="lbl">Peso</span><b class="num">${kg?fmt(kg,1)+' kg':'—'}</b><span class="note">Agua ${fmt((S.water[d]||0)/1000,2)} L</span></div>
         <div class="mini"><span class="lbl">Entreno</span><b class="num">${ws.length?fmt(ws.reduce((s,w)=>s+workoutVolume(w),0))+' kg':'—'}</b><span class="note">${ws.length?ws.length+' sesión'+(ws.length>1?'es':''):'Sin entreno'}</span></div>
       </div>
-      ${tks.length?`<div><div class="lbl" style="margin-bottom:8px">Retos asignados</div><div class="stack">${tks.map(x=>taskRow(x,false)).join('')}</div></div>`:''}
       <div class="grid g2"><div><div class="lbl" style="margin-bottom:6px">Comidas</div>${meals||'<div class="note">No registraste comidas.</div>'}</div><div><div class="lbl" style="margin-bottom:6px">Entrenos</div>${wx||'<div class="note">No registraste entrenos.</div>'}</div></div>
-      <div><div class="lbl" style="margin-bottom:8px">Fotos</div>${ph.length?`<div class="phgrid">${ph.map(thumb).join('')}</div>`:'<div class="note">Sin fotos este día.</div>'}</div>`,
-    foot:()=>`<button class="btn" data-m="photo">${CAM} Añadir foto</button><button class="btn" data-m="meal">+ Comida</button><button class="btn" data-m="close">Cerrar</button>`,
+      <div><div class="lbl" style="margin-bottom:8px">Fotos</div>${ph.length?`<div class="phgrid">${ph.map(thumb).join('')}</div>`:'<div class="note">Sin fotos este día.</div>'}</div>`},
+    foot:()=>`${d>today()?'':`<button class="btn" data-m="photo">${CAM} Añadir foto</button><button class="btn" data-m="meal">+ Comida</button>`}<button class="btn pri" data-m="close">Cerrar</button>`,
     act:a=>{if(a==='photo'){closeModal();photoModal({date:d,chId})}if(a==='meal'){closeModal();mealModal(d)}}});
 }
 /* peso dentro de un reto */
@@ -1894,7 +1894,8 @@ function taskReplyModal(x){
   const prev=()=>isUrl(st.photo)?imgLink(st.photo.trim(),'Foto de respuesta','big'):'';
   openModal({title:'Responder al reto',
     body:()=>`<div class="task st-pending">${`<span class="tk-ic">${STAR}</span><div class="grow"><div class="t">${esc(x.title)}</div><div class="s">De ${esc(x.name||'Anónimo')} · ${shortDate(x.day)}${x.note?' · '+esc(x.note):''}</div></div>`}</div>
-      <div class="field"><span class="lbl">¿Lo cumpliste?</span><div class="toggle"><button type="button" class="${st.status==='done'?'on':''}" data-m="st" data-v="done">✓ Sí, lo cumplí</button><button type="button" class="${st.status==='missed'?'on':''}" data-m="st" data-v="missed">No lo cumplí</button></div></div>
+      ${x.day>today()?`<div class="note">Este reto es para el ${shortDate(x.day)}. Puedes responder ya (por ejemplo, para confirmar que lo harás) y marcar si lo cumpliste ese día.</div>`:''}
+      <div class="field" ${x.day>today()?'hidden':''}><span class="lbl">¿Lo cumpliste?</span><div class="toggle"><button type="button" class="${st.status==='done'?'on':''}" data-m="st" data-v="done">✓ Sí, lo cumplí</button><button type="button" class="${st.status==='missed'?'on':''}" data-m="st" data-v="missed">No lo cumplí</button></div></div>
       <div class="field"><label for="rp-t">Tu respuesta</label><textarea class="in" id="rp-t" data-f="reply" rows="3" maxlength="500" placeholder="Ej. Hecho, ni un dulce en todo el día">${esc(st.reply)}</textarea></div>
       <div class="field"><label for="rp-p">Foto por enlace (opcional)</label><input class="in" id="rp-p" data-f="photo" value="${esc(st.photo)}" placeholder="https://i.imgur.com/abc123.jpg" autocomplete="off"></div>
       <div class="ph-prev" id="rp-prev">${prev()}</div><div class="note">${URL_HELP}</div>`,
@@ -1903,7 +1904,7 @@ function taskReplyModal(x){
     act:(a,el)=>{if(a==='st'){st.status=el.dataset.v;document.querySelectorAll('#modal [data-m="st"]').forEach(b=>b.classList.toggle('on',b.dataset.v===st.status))}
       if(a==='send'){const ph=st.photo.trim();if(ph&&!isUrl(ph)){toast('El enlace de la foto debe empezar por https://');return}
         if(!st.reply.trim()&&!ph){toast('Escribe una frase o añade una foto');return}
-        withAuth(async()=>{try{await FB.db.collection('shares').doc(x.shareId).collection('tasks').doc(x.id).update({status:st.status,doneAt:Date.now(),reply:st.reply.trim().slice(0,500),replyPhoto:ph,replyAt:Date.now()});closeModal();toast('Respuesta enviada ✓')}
+        withAuth(async()=>{try{await FB.db.collection('shares').doc(x.shareId).collection('tasks').doc(x.id).update({status:x.day>today()?(x.status||'pending'):st.status,doneAt:Date.now(),reply:st.reply.trim().slice(0,500),replyPhoto:ph,replyAt:Date.now()});closeModal();toast('Respuesta enviada ✓')}
           catch(e){toast(e.code==='permission-denied'?'Sin permiso: actualiza las reglas de Firestore':'No se pudo enviar la respuesta')}})}}});
 }
 const taskReplyHtml=x=>x.reply||x.replyPhoto?`<div class="tk-reply"><div class="lbl">Respuesta</div>${x.reply?`<div>«${esc(x.reply)}»</div>`:''}${x.replyPhoto?imgLink(x.replyPhoto,'Foto de respuesta','sm'):''}</div>`:'';
@@ -2130,9 +2131,9 @@ function route(){const h=location.hash.slice(1);if(h.startsWith('reto-'))return 
 function render(){
   const r=route();
   const nr=r==='reto'?'retos':r;const lk=(k,l,on,sub)=>`<a href="#${k}" class="${on?'on':''} ${sub?'subnav':''}" title="${l}" ${on?'aria-current="page"':''}>${ico(k)}<span>${l}</span></a>`;renderAcct();
-  $('#nav').innerHTML=ROUTES.map(([k,l])=>lk(k,l,k===nr,k==='fotos')).join('');$('#tabbar').innerHTML=ROUTES.filter(([k])=>k!=='fotos').map(([k,l])=>lk(k,l,k===nr||(k==='progreso'&&nr==='fotos'))).join('');
+  $('#nav').innerHTML=ROUTES.filter(([k])=>k!=='fotos').map(([k,l])=>lk(k,l,k===nr||(k==='progreso'&&nr==='fotos'))).join('');$('#tabbar').innerHTML=ROUTES.filter(([k])=>k!=='fotos').map(([k,l])=>lk(k,l,k===nr||(k==='progreso'&&nr==='fotos'))).join('');
   const y=window.scrollY;
-  $('#main').innerHTML=r==='reto'?vReto(location.hash.slice(6)):VIEWS[r]();ensureTaskSubs();
+  $('#main').innerHTML=r==='reto'?vReto(location.hash.slice(6)):VIEWS[r]();ensureTaskSubs();if(M&&M.redraw)drawModal();
   window.scrollTo(0,y);
 }
 const VIEWER=location.hash.startsWith('#ver=');
