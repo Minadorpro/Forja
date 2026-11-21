@@ -773,12 +773,12 @@ function kcalGauge(k,lo,hi){
 
 /* ---------- panel de un reto ---------- */
 function ownerInfo(c){const t=today();return d=>{
-  if(c.kind==='goal'){const v=num(c.log?.[d]);const full=v>=num(c.target)/c.days;const kg=c.trackWeight?weightOn(d):null;const hasPh=S.photos.some(p=>p.date===d&&p.chId===c.id);return d>t?{st:'fut'}:{st:v?(full?'ok':'part'):d===t?'pend':'miss',ic:hasPh?`<span class="rcam">${CAM}</span>`:'',sub:[v?fmt(v,1):'',kg?fmt(kg,1)+'kg':''].filter(Boolean).join(' · '),lab:v?fmt(v,1)+' '+c.unit:''}}
+  if(c.kind==='goal'){const v=num(c.log?.[d]);const full=v>=num(c.target)/c.days;const kg=c.trackWeight?weightOn(d):null;const hasPh=S.photos.some(p=>p.date===d&&p.chId===c.id);return d>t?{st:'fut',ic:hasPh?`<span class="rcam">${CAM}</span>`:'',sub:kg?fmt(kg,1)+'kg':''}:{st:v?(full?'ok':'part'):d===t?'pend':'miss',ic:hasPh?`<span class="rcam">${CAM}</span>`:'',sub:[v?fmt(v,1):'',kg?fmt(kg,1)+'kg':''].filter(Boolean).join(' · '),lab:v?fmt(v,1)+' '+c.unit:''}}
   const chk=dayCheck(c,d),done=dayDone(c,d),v=verifyOf(c);
   const tks=c.share&&c.share.on?tasksOn(d,c.share.id).length:0;
   const kg=c.trackWeight?weightOn(d):null,hasPh=S.photos.some(p=>p.date===d&&p.chId===c.id);
   const ic=(chk.ws.length?DUMB:'')+(hasPh?`<span class="rcam">${CAM}</span>`:'')+(tks?`<span class="rstar">${STAR}</span>`:'');const sub=[(v==='kcal'||v==='both')&&chk.n?fmt(chk.kcal):'',kg?fmt(kg,1)+'kg':''].filter(Boolean).join(' · ');
-  if(d>t)return{st:'fut',ic:tks?`<span class="rstar">${STAR}</span>`:''};
+  if(d>t)return{st:'fut',ic:(hasPh?`<span class="rcam">${CAM}</span>`:'')+(tks?`<span class="rstar">${STAR}</span>`:''),sub:kg?fmt(kg,1)+'kg':''};
   return{st:done?'ok':d===t?'pend':'miss',ic,sub,lab:done?'cumplido':'no cumplido'};
 }}
 function vReto(id){
@@ -981,7 +981,8 @@ let SHARE_ST={msg:''},pubTimer=null;const lastPub={};
 function schedulePublish(){if(inClaude()||!fbCfg()||!S.challenges.some(c=>c.share&&c.share.on))return;clearTimeout(pubTimer);pubTimer=setTimeout(publishShares,2000)}
 function buildSnapshot(c){
   const sh=c.share,end=addDays(c.start,c.days-1),t=today(),last=t<end?t:end,days={};
-  for(let d=c.start;d<=last;d=addDays(d,1)){
+  for(let d=c.start;d<=end;d=addDays(d,1)){
+    if(d>last){const e={fut:true,ok:false};if(c.trackWeight){const kg=weightOn(d);if(kg)e.wt=kg}if(sh.photos!==false){const ph=photosOn(d,c.id);if(ph.length)e.ph=ph.map(p=>({u:p.url,n:p.note||''}))}if(e.wt||e.ph)days[d]=e;continue}
     const chk=dayCheck(c,d),e={ok:dayDone(c,d),m:!!(c.log&&c.log[d]),k:Math.round(chk.kcal),p:Math.round(chk.tot.p),c:Math.round(chk.tot.c),f:Math.round(chk.tot.f),n:chk.n,w:chk.ws.map(w=>w.name)};
     if(c.kind==='goal')e.v=num(c.log?.[d]);
     if(c.trackWeight){const kg=weightOn(d);if(kg)e.wt=kg}
@@ -1082,7 +1083,7 @@ function viewerRender(){
   const D=V.data;
   if(!D){$('#v-main').innerHTML='<div class="empty">Este reto ya no se comparte o el enlace no es correcto.</div>';return}
   const c=D.ch,t=today(),end=addDays(c.start,c.days-1),months=chMonths(c.start,end),days=D.days||{};
-  const keys=Object.keys(days);
+  const allKeys2=Object.keys(days);const keys=allKeys2.filter(d=>!days[d].fut);
   const done=keys.filter(d=>days[d].ok).length;
   const total=c.kind==='habit'?done:keys.reduce((s,d)=>s+num(days[d].v),0);
   const target=c.kind==='habit'?c.days:c.target||1,pct=clamp(total/target,0,1);
@@ -1091,10 +1092,10 @@ function viewerRender(){
   let streak=0;{let d=days[t]&&days[t].ok?t:addDays(t,-1);while(days[d]&&days[d].ok){streak++;d=addDays(d,-1)}}
   const left=Math.max(0,diffDays(end,t));
   const vt=d=>V.tasks.filter(x=>x.day===d);const star=d=>vt(d).length?`<span class="rstar">${STAR}</span>`:'';
-  const info=d=>{if(d>t||!days[d])return{st:'fut',ic:star(d)};const x=days[d];
+  const info=d=>{if(d>t||!days[d]||days[d].fut){const f=days[d];return{st:'fut',ic:(f&&f.ph?`<span class="rcam">${CAM}</span>`:'')+star(d),sub:f&&f.wt?fmt(f.wt,1)+'kg':''}};const x=days[d];
     if(c.kind==='goal'){const full=num(x.v)>=c.target/c.days;return{st:x.v?(full?'ok':'part'):d===t?'pend':'miss',sub:x.v?fmt(x.v,1):'',ic:star(d)}}
     return{st:x.ok?'ok':d===t?'pend':'miss',ic:(x.w&&x.w.length?DUMB:'')+(x.ph&&x.ph.length?`<span class="rcam">${CAM}</span>`:'')+star(d),sub:[(c.verify==='kcal'||c.verify==='both')&&x.n?fmt(x.k):'',x.wt?fmt(x.wt,1)+'kg':''].filter(Boolean).join(' · ')}};
-  const wts=keys.filter(d=>days[d].wt).sort();const w0=wts.length?days[wts[0]].wt:null,w1=wts.length?days[wts[wts.length-1]].wt:null;
+  const wts=allKeys2.filter(d=>days[d].wt).sort();const w0=wts.length?days[wts[0]].wt:null,w1=wts.length?days[wts[wts.length-1]].wt:null;
   const rule=c.kind!=='habit'?`Meta: sumar ${fmt(c.target,1)} ${esc(c.unit)} en ${c.days} días.`:c.verify==='manual'?'Se marca manualmente cada día.':c.verify==='workout'?'Cada día cuenta solo si hay un entreno registrado.':c.verify==='kcal'?`Cada día cuenta solo con calorías entre <b>${fmt(c.lo)}</b> y <b>${fmt(c.hi)}</b> kcal.`:`Cada día cuenta solo con un entreno registrado y calorías entre <b>${fmt(c.lo)}</b> y <b>${fmt(c.hi)}</b> kcal.`;
   const x=days[V.sel];
   let dayHtml='';
@@ -1106,7 +1107,7 @@ function viewerRender(){
     ${V.sel>t?`<div class="stack"><div class="frow g2"><div class="field"><label for="tk-title">Reto para ${esc(D.owner||'él')}</label><input class="in" id="tk-title" maxlength="120" placeholder="Ej. No comer azúcar"></div><div class="field"><label for="tk-name">Tu nombre</label><input class="in" id="tk-name" maxlength="60" value="${esc(keepName)}" placeholder="Ej. Carlos"></div></div>
       <div class="field"><label for="tk-note">Nota (opcional)</label><input class="in" id="tk-note" maxlength="300" placeholder="Ej. Tampoco refrescos ni zumos"></div>
       <div class="actions"><button class="btn goal" data-act="v-task">${STAR} Asignar reto para el ${shortDate(V.sel)}</button><span class="note" id="tk-st"></span></div></div>`:''}</div>`;
-  if(V.sel>t)dayHtml='<div class="note" style="margin-bottom:12px">Este día aún no ha llegado. Puedes asignarle un reto.</div>';
+  if(V.sel>t){const f=days[V.sel];dayHtml='<div class="note" style="margin-bottom:12px">Este día aún no ha llegado. Puedes asignarle un reto.</div>'+(f&&f.wt?`<div class="chk-row ok"><span class="cdot">✓</span><div><b>Peso</b><div class="note num">${fmt(f.wt,1)} kg</div></div></div>`:'')+(f&&f.ph?`<div class="lbl" style="margin:14px 0 8px">Fotos</div><div class="phgrid">${f.ph.map(p=>`<div>${imgLink(p.u,p.n)}${p.n?`<div class="note">${esc(p.n)}</div>`:''}</div>`).join('')}</div>`:'')}
   else if(!x)dayHtml='<div class="note">Sin datos para este día.</div>';
   else{
     const st=x.ok?'<span class="chip done">✓ Cumplido</span>':V.sel===t?'<span class="chip">Pendiente</span>':'<span class="chip acc">No cumplido</span>';
@@ -1875,7 +1876,7 @@ function dayModal(d,chId){
 function weightCard(c){
   if(!c.trackWeight)return '';
   const end=addDays(c.start,c.days-1),t=today(),last=t<end?t:end;
-  const pts=sortedWeights().filter(w=>w.date>=c.start&&w.date<=last);
+  const pts=sortedWeights().filter(w=>w.date>=c.start&&w.date<=end);
   const before=sortedWeights().filter(w=>w.date<c.start).pop();
   const start=pts[0]||before,cur=pts[pts.length-1];
   const diff=start&&cur?cur.kg-start.kg:null;
